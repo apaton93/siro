@@ -171,3 +171,12 @@ erDiagram
 - **Guides are reusable** – city-level sections, with optional fixture-level overrides.
 - **Stadiums can be shared** – Team → home stadium; Fixture has its own stadium (neutral venues/finals).
 - **Internationals ready** – `TEAM.type` and `COMPETITION.type`; national teams have no city.
+
+## Implementation notes (SIRO-22)
+Source of truth is now `db/src/schema.ts`. Small additions made while implementing:
+- `fixtures.stage` (e.g. "League phase"); check that home and away teams differ.
+- `guide_sections.title` and `sort_order`; check that a section belongs to a city or a fixture.
+- `users.is_admin` for the admin journey; table is `users` (`user` is reserved in Postgres).
+- `posts.hidden` for moderation.
+- `created_at` on all activity tables; unique attendance per user per fixture.
+- Location columns are plain `geography` (SRID 4326 default) – drizzle-kit can't emit `geography(Point,4326)`.

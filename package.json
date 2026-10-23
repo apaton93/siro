@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "workspaces": [
+    "db",
     "app",
     "api"
   ],
@@ -14,9 +15,13 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d",
+    "db:generate": "npm run generate -w @siro/db",
+    "db:migrate": "npm run migrate -w @siro/db",
+    "db:seed": "npm run seed -w @siro/db",
+    "db:studio": "npm run studio -w @siro/db",
     "dev": "concurrently -k -n app,api,swa -c magenta,cyan,green \"npm run dev -w @siro/app\" \"npm run dev -w @siro/api\" \"swa start siro\"",
-    "build": "npm run build -w @siro/app && npm run build -w @siro/api",
-    "typecheck": "npm run typecheck -w @siro/api && npx -w @siro/app tsc -b"
+    "build": "npm run build -w @siro/db && npm run build -w @siro/app && npm run build -w @siro/api",
+    "typecheck": "npm run typecheck -w @siro/db && npm run typecheck -w @siro/api && npx -w @siro/app tsc -b"
   },
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.0",
