@@ -12,7 +12,7 @@ MVP in development. Work is tracked in Jira (project **SIRO**).
 |---|---|
 | `app/` | Frontend – React + Vite + TypeScript (mobile-first) |
 | `api/` | Backend – Azure Functions (Node + TypeScript) |
-| `db/` | Drizzle ORM schema, migrations and seed data |
+| `db/` | `@siro/db` – Drizzle ORM schema, migrations and seed data |
 | `docs/` | Data model, architecture, user journeys and decision records (`docs/adr`) |
 
 ## Tech stack
@@ -31,9 +31,11 @@ React · TypeScript · Vite · Azure Static Web Apps · Azure Functions · Postg
 ```powershell
 git clone https://github.com/apaton93/siro.git
 cd siro
-npm install          # installs app + api (npm workspaces)
+npm install          # installs db + app + api (npm workspaces)
 npm run setup        # creates api/local.settings.json from the example
 npm run db:up        # starts Postgres + PostGIS in Docker
+npm run db:migrate   # creates the tables
+npm run db:seed      # loads the example Barcelona v Dundee United data
 npm run dev          # starts app + api behind the SWA CLI
 ```
 Open **http://localhost:4280** – the System check should show API, Database and PostGIS ticks.
@@ -43,9 +45,13 @@ Open **http://localhost:4280** – the System check should show API, Database an
 |---|---|
 | `npm run dev` | App, API and SWA proxy together (labelled app/api/swa output) at http://localhost:4280 |
 | `npm run db:up` / `db:down` | Start / stop the local database |
-| `npm run db:reset` | Wipe and recreate the local database |
-| `npm run build` | Production build of app and API |
-| `npm run typecheck` | TypeScript checks for app and API |
+| `npm run db:reset` | Wipe and recreate the local database (then `db:migrate` + `db:seed`) |
+| `npm run db:migrate` | Apply database migrations |
+| `npm run db:seed` | Wipe tables and reload dev seed data |
+| `npm run db:studio` | Browse the database in Drizzle Studio |
+| `npm run db:generate` | Generate a migration after changing `db/src/schema.ts` |
+| `npm run build` | Production build of db, app and API |
+| `npm run typecheck` | TypeScript checks for db, app and API |
 
 ### Local URLs
 | URL | Service |
