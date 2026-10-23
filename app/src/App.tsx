@@ -12,7 +12,8 @@ function App() {
   useEffect(() => {
     fetch('/api/health')
       .then(async (res) => {
-        const body = await res.json()
+        // Platform errors (e.g. "Backend call failure") come back as HTML, not JSON
+        const body = await res.json().catch(() => ({ error: `HTTP ${res.status} (non-JSON response)` }))
         if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`)
         setHealth({ state: 'ok', database: body.database, postgis: body.postgis })
       })
