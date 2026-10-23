@@ -1,0 +1,25 @@
+{
+  "name": "siro",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "app",
+    "api"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "node -e \"const fs=require('fs');const t='api/local.settings.json';if(!fs.existsSync(t)){fs.copyFileSync('api/local.settings.example.json',t);console.log('Created '+t)}else{console.log(t+' already exists')}\"",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "dev": "concurrently -k -n app,api,swa -c magenta,cyan,green \"npm run dev -w @siro/app\" \"npm run dev -w @siro/api\" \"swa start siro\"",
+    "build": "npm run build -w @siro/app && npm run build -w @siro/api",
+    "typecheck": "npm run typecheck -w @siro/api && npx -w @siro/app tsc -b"
+  },
+  "devDependencies": {
+    "@azure/static-web-apps-cli": "^2.0.0",
+    "concurrently": "^9.1.0"
+  }
+}

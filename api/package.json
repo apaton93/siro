@@ -1,0 +1,23 @@
+{
+  "name": "@siro/api",
+  "private": true,
+  "version": "0.0.0",
+  "main": "dist/src/functions/*.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "npm run clean && npm run build && concurrently -k -n tsc,func -c yellow,cyan \"tsc -w --preserveWatchOutput\" \"func start\"",
+    "start": "func start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.0"
+  }
+}

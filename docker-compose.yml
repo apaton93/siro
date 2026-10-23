@@ -1,0 +1,22 @@
+# Local Postgres + PostGIS for development only.
+# Start: npm run db:up   Stop: npm run db:down   Wipe data: npm run db:reset
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: siro-db
+    environment:
+      POSTGRES_USER: siro
+      POSTGRES_PASSWORD: siro
+      POSTGRES_DB: siro
+    ports:
+      - "5433:5432"
+    volumes:
+      - siro-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siro -d siro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  siro-db-data:

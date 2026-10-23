@@ -1,0 +1,13 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "siro": {
+      "appLocation": "app",
+      "apiLocation": "api",
+      "outputLocation": "dist",
+      "appDevserverUrl": "http://127.0.0.1:5173",
+      "apiDevserverUrl": "http://127.0.0.1:7071",
+      "devserverTimeout": 180
+    }
+  }
+}
