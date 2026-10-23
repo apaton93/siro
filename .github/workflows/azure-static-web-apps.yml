@@ -1,0 +1,79 @@
+# Build, check and deploy Siro to Azure Static Web Apps.
+# - Pull request to main  -> checks + preview environment (URL posted on the PR)
+# - Push/merge to main    -> checks + production deploy
+# - PR closed             -> preview environment removed
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write # lets the deploy action comment the preview URL
+
+concurrency:
+  group: deploy-${{ github.event.pull_request.number || 'production' }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy:
+    if: github.event_name == 'push' || github.event.action != 'closed'
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint -w @siro/app
+
+      - name: Build
+        run: npm run build
+
+      # Workspaces hoist dependencies to the repo root, so build a standalone
+      # API folder with its own production node_modules for Azure Functions.
+      - name: Package API
+        run: |
+          rm -rf .deploy/api
+          mkdir -p .deploy/api
+          cp api/host.json api/package.json .deploy/api/
+          cp -r api/dist .deploy/api/dist
+          cd .deploy/api
+          npm install --omit=dev --no-package-lock --no-workspaces --ignore-scripts --no-audit --no-fund
+
+      - name: Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: app/dist
+          api_location: .deploy/api
+          output_location: ''
+          skip_app_build: true
+          skip_api_build: true
+
+  close_preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    name: Remove preview environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close
+          app_location: ''

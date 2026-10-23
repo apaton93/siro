@@ -66,3 +66,12 @@ Open **http://localhost:4280** – the System check should show API, Database an
 - [Architecture](docs/architecture.md)
 - [User journeys](docs/user-journeys.md)
 - [Decision records](docs/adr/)
+
+## Deployment
+GitHub Actions (`.github/workflows/azure-static-web-apps.yml`) deploys to Azure Static Web Apps:
+- **Pull request** → typecheck, lint, build, then a **preview site** (URL posted as a PR comment). Removed when the PR closes.
+- **Merge to main** → same checks, then **production** deploy.
+
+Requires the `AZURE_STATIC_WEB_APPS_API_TOKEN` repo secret. Runtime settings (`DATABASE_URL`, `APPLICATIONINSIGHTS_CONNECTION_STRING`) live in the Static Web App's environment variables, never in the repo.
+
+Database migrations against Azure are run manually for now (`DATABASE_URL=... npm run db:migrate`).
