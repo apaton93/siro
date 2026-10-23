@@ -53,7 +53,7 @@ Open **http://localhost:4280** – the System check should show API, Database an
 | http://localhost:4280 | Site (use this one) |
 | http://127.0.0.1:5173 | Vite dev server (frontend only) |
 | http://localhost:7071/api/health | Functions host directly |
-| `localhost:5432` | Postgres (user/password/db: `siro`) |
+| `127.0.0.1:5433` | Postgres in Docker (user/password/db: `siro`). Port 5433 avoids clashing with any local Postgres install on 5432. |
 
 ## Docs
 - [Data model](docs/data-model.md)

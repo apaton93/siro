@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: siro
       POSTGRES_DB: siro
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - siro-db-data:/var/lib/postgresql/data
     healthcheck:
