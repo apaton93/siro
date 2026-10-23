@@ -5,10 +5,9 @@
       "appLocation": "app",
       "apiLocation": "api",
       "outputLocation": "dist",
-      "appDevserverUrl": "http://localhost:5173",
-      "apiDevserverUrl": "http://localhost:7071",
-      "run": "npm run dev:servers",
-      "devserverTimeout": 120
+      "appDevserverUrl": "http://127.0.0.1:5173",
+      "apiDevserverUrl": "http://127.0.0.1:7071",
+      "devserverTimeout": 180
     }
   }
 }

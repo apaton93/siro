@@ -41,7 +41,7 @@ Open **http://localhost:4280** – the System check should show API, Database an
 ### Everyday commands
 | Command | What it does |
 |---|---|
-| `npm run dev` | App + API with hot reload at http://localhost:4280 |
+| `npm run dev` | App, API and SWA proxy together (labelled app/api/swa output) at http://localhost:4280 |
 | `npm run db:up` / `db:down` | Start / stop the local database |
 | `npm run db:reset` | Wipe and recreate the local database |
 | `npm run build` | Production build of app and API |
@@ -51,7 +51,7 @@ Open **http://localhost:4280** – the System check should show API, Database an
 | URL | Service |
 |---|---|
 | http://localhost:4280 | Site (use this one) |
-| http://localhost:5173 | Vite dev server (frontend only) |
+| http://127.0.0.1:5173 | Vite dev server (frontend only) |
 | http://localhost:7071/api/health | Functions host directly |
 | `localhost:5432` | Postgres (user/password/db: `siro`) |
 
