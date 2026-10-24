@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "workspaces": [
+    "shared",
     "db",
     "app",
     "api"
@@ -21,7 +22,9 @@
     "db:studio": "npm run studio -w @siro/db",
     "dev": "concurrently -k -n app,api,swa -c magenta,cyan,green \"npm run dev -w @siro/app\" \"npm run dev -w @siro/api\" \"swa start siro\"",
     "build": "npm run build -w @siro/db && npm run build -w @siro/app && npm run build -w @siro/api",
-    "typecheck": "npm run typecheck -w @siro/db && npm run typecheck -w @siro/api && npx -w @siro/app tsc -b"
+    "typecheck": "npm run typecheck -w @siro/db && npm run typecheck -w @siro/api && npx -w @siro/app tsc -b",
+    "test": "npm run test -w @siro/api",
+    "package:api": "node api/scripts/package.mjs"
   },
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.0",

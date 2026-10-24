@@ -44,16 +44,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Workspaces hoist dependencies to the repo root, so build a standalone
-      # API folder with its own production node_modules for Azure Functions.
+      - name: Test
+        run: npm test
+
+      # Bundled API + only the Functions SDK, in a standalone folder Azure can run.
       - name: Package API
-        run: |
-          rm -rf .deploy/api
-          mkdir -p .deploy/api
-          cp api/host.json api/package.json .deploy/api/
-          cp -r api/dist .deploy/api/dist
-          cd .deploy/api
-          npm install --omit=dev --no-package-lock --no-workspaces --ignore-scripts --no-audit --no-fund
+        run: npm run package:api
 
       - name: Deploy
         uses: Azure/static-web-apps-deploy@v1

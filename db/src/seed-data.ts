@@ -73,6 +73,8 @@ export async function seed(db: AnyDb): Promise<void> {
         countryCode: 'ES',
         cityId: barcelona.id,
         homeStadiumId: campNou.id,
+        primaryColour: '#A50044',
+        onPrimaryColour: '#FFFFFF',
       },
       {
         name: 'Dundee United',
@@ -81,6 +83,8 @@ export async function seed(db: AnyDb): Promise<void> {
         countryCode: 'GB',
         cityId: dundee.id,
         homeStadiumId: tannadice.id,
+        primaryColour: '#F47920',
+        onPrimaryColour: '#0B0B0C',
       },
     ])
     .returning()

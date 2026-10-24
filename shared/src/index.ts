@@ -10,6 +10,15 @@ export interface TeamRef {
   name: string
   shortName: string
   crestUrl: string | null
+  /** Kit colour as #RRGGBB – fixture cards/headers use the away team's (ADR-0010). */
+  primaryColour: string
+  /** Text colour that reads on primaryColour. */
+  onPrimaryColour: string
+}
+
+export interface CityPhoto {
+  photoUrl: string | null
+  photoCredit: string | null
 }
 
 export interface CompetitionRef {
@@ -28,7 +37,7 @@ export interface FixtureSummary {
   homeTeam: TeamRef
   awayTeam: TeamRef
   stadium: { id: string; name: string }
-  city: { id: string; name: string; countryCode: string; timezone: string }
+  city: { id: string; name: string; countryCode: string; timezone: string } & CityPhoto
   goingCount: number
 }
 
@@ -68,7 +77,7 @@ export interface FixtureDetail extends FixtureSummary {
     timezone: string
     currency: string
     language: string
-  }
+  } & CityPhoto
   threadCount: number
   airports: AirportInfo[]
   guideSections: GuideSectionInfo[]
