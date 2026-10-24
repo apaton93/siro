@@ -126,3 +126,92 @@ export const LIMITS = {
   displayNameMax: 30,
   maxTeams: 5,
 } as const
+
+// ---------- Admin (/api/admin) ----------
+
+export type AdminEntity = 'competitions' | 'cities' | 'stadiums' | 'teams' | 'airports' | 'fixtures' | 'guide-sections'
+
+export interface CompetitionInput {
+  name: string
+  type: 'club' | 'international'
+}
+
+export interface CityInput {
+  name: string
+  countryCode: string
+  currency: string
+  language: string
+  timezone: string
+  lat: number
+  lng: number
+  photoUrl: string | null
+  photoCredit: string | null
+}
+
+export interface StadiumInput {
+  name: string
+  cityId: string
+  capacity: number | null
+  lat: number
+  lng: number
+  awayEntranceNotes: string | null
+}
+
+export interface TeamInput {
+  name: string
+  shortName: string
+  type: 'club' | 'national'
+  countryCode: string
+  cityId: string | null
+  homeStadiumId: string | null
+  crestUrl: string | null
+  primaryColour: string
+  onPrimaryColour: string
+}
+
+export interface AirportInput {
+  name: string
+  iata: string
+  cityId: string
+  lat: number
+  lng: number
+}
+
+export interface FixtureInput {
+  competitionId: string
+  stage: string | null
+  homeTeamId: string
+  awayTeamId: string
+  stadiumId: string
+  kickoffUtc: string
+  status: FixtureStatus
+  homeScore: number | null
+  awayScore: number | null
+  scoreNotes: string | null
+}
+
+export interface GuideSectionInput {
+  cityId: string | null
+  fixtureId: string | null
+  type: string
+  title: string
+  content: string
+  sortOrder: number
+}
+
+type WithId<T> = T & { id: string }
+
+/** Everything the admin screens need, in one request (fine at MVP scale). */
+export interface AdminReference {
+  competitions: WithId<CompetitionInput>[]
+  cities: WithId<CityInput>[]
+  stadiums: WithId<StadiumInput>[]
+  teams: WithId<TeamInput>[]
+  airports: WithId<AirportInput>[]
+  fixtures: WithId<FixtureInput>[]
+  guideSections: WithId<GuideSectionInput>[]
+}
+
+export interface AdminSaveResponse {
+  id: string
+}

@@ -10,7 +10,8 @@
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "studio": "drizzle-kit studio",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "make-admin": "tsx src/make-admin.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

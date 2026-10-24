@@ -79,3 +79,12 @@ GitHub Actions (`.github/workflows/azure-static-web-apps.yml`) deploys to Azure 
 Requires the `AZURE_STATIC_WEB_APPS_API_TOKEN` repo secret. Runtime settings (`DATABASE_URL`, `APPLICATIONINSIGHTS_CONNECTION_STRING`) live in the Static Web App's environment variables, never in the repo.
 
 Database migrations against Azure are run manually for now (`DATABASE_URL=... npm run db:migrate`).
+
+## Admin
+Fixtures, teams, stadiums, cities, airports and guides are managed at `/admin` (signed-in admins only).
+To make yourself an admin, sign in once, then from PowerShell:
+```powershell
+$env:DATABASE_URL = '<connection string>'   # leave unset for local
+npm run db:make-admin -- "Your Display Name"
+Remove-Item Env:DATABASE_URL
+```

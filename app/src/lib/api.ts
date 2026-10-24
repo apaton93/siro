@@ -1,4 +1,7 @@
 import type {
+  AdminEntity,
+  AdminReference,
+  AdminSaveResponse,
   ApiError,
   FixtureDetail,
   FixturesListResponse,
@@ -58,6 +61,14 @@ export const api = {
   going: (fixtureId: string, signal?: AbortSignal) => get<GoingStatus>(`/api/me/going/${enc(fixtureId)}`, signal),
   setGoing: (fixtureId: string, going: boolean) =>
     request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),
+
+  // Admins only (403 otherwise)
+  adminReference: (signal?: AbortSignal) => get<AdminReference>('/api/admin/reference', signal),
+  adminSave: (entity: AdminEntity, id: string | null, body: unknown) =>
+    id
+      ? request<AdminSaveResponse>('PUT', `/api/admin/${entity}/${enc(id)}`, { body })
+      : request<AdminSaveResponse>('POST', `/api/admin/${entity}`, { body }),
+  adminDelete: (entity: AdminEntity, id: string) => request<null>('DELETE', `/api/admin/${entity}/${enc(id)}`),
 }
 
 export type Loadable<T> =
