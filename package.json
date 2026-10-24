@@ -21,6 +21,7 @@
     "db:generate": "npm run generate -w @siro/db",
     "db:migrate": "npm run migrate -w @siro/db",
     "db:seed": "npm run seed -w @siro/db",
+    "db:make-admin": "npm run make-admin -w @siro/db --",
     "db:studio": "npm run studio -w @siro/db",
     "dev": "concurrently -k -n app,api,swa -c magenta,cyan,green \"npm run dev -w @siro/app\" \"npm run dev -w @siro/api\" \"swa start siro\"",
     "build": "npm run build -w @siro/db && npm run build -w @siro/app && npm run build -w @siro/api",

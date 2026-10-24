@@ -5,12 +5,25 @@
   "routes": [
     {
       "route": "/api/me*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": [
+        "authenticated"
+      ]
+    },
+    {
+      "route": "/api/admin*",
+      "allowedRoles": [
+        "authenticated"
+      ]
     }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/api/*", "/.auth/*", "/assets/*", "/*.{svg,png,jpg,ico,webp,json,txt}"]
+    "exclude": [
+      "/api/*",
+      "/.auth/*",
+      "/assets/*",
+      "/*.{svg,png,jpg,ico,webp,json,txt}"
+    ]
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",

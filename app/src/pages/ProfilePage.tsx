@@ -1,5 +1,6 @@
 import { LIMITS, type Me, type MyTeam, type TeamRef } from '@siro/shared'
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import { TopBar } from '../components/AppShell'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
@@ -65,9 +66,16 @@ function Profile({ me }: { me: Me }) {
       <NameForm me={me} />
       <TeamsEditor me={me} />
 
-      <a className="btn" href={signOutUrl()} style={{ alignSelf: 'flex-start' }}>
-        Sign out
-      </a>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {me.isAdmin && (
+          <Link className="btn btn-dark" to="/admin">
+            Admin
+          </Link>
+        )}
+        <a className="btn" href={signOutUrl()}>
+          Sign out
+        </a>
+      </div>
     </>
   )
 }

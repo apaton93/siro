@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router'
 import { AppShell } from './components/AppShell'
+import { AdminPage } from './pages/AdminPage'
 import { FixturePage } from './pages/FixturePage'
 import { HomePage } from './pages/HomePage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -21,6 +22,7 @@ export default function App() {
           element={<ComingSoonPage title="Fan map">See where fans are staying, recommended pubs and live check-ins.</ComingSoonPage>}
         />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="admin" element={<AdminPage />} />
         <Route path="signin" element={<SignInPage />} />
         <Route path="status" element={<StatusPage />} />
         <Route path="*" element={<NotFoundPage />} />
