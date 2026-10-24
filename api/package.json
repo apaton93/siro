@@ -2,22 +2,31 @@
   "name": "@siro/api",
   "private": true,
   "version": "0.0.0",
-  "main": "dist/src/functions/*.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/build.mjs",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
-    "dev": "npm run clean && npm run build && concurrently -k -n tsc,func -c yellow,cyan \"tsc -w --preserveWatchOutput\" \"func start\"",
+    "dev": "npm run clean && npm run build && concurrently -k -n esbuild,func -c yellow,cyan \"node scripts/build.mjs --watch\" \"func start\"",
     "start": "func start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@azure/functions": "^4.7.0",
+    "@siro/db": "*",
+    "@siro/shared": "*",
+    "drizzle-orm": "^0.45.4",
     "pg": "^8.13.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@electric-sql/pglite-postgis": "^0.2.11",
     "@types/node": "^22.10.0",
     "@types/pg": "^8.11.10",
     "concurrently": "^9.1.0",
-    "typescript": "^5.7.0"
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.7"
   }
 }

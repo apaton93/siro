@@ -12,5 +12,6 @@ One file per significant decision. Never edit an accepted ADR's decision: write 
 | [0006](0006-location-privacy.md) | Location privacy | Accepted |
 | [0007](0007-open-browsing-login-to-contribute.md) | Open browsing, login to contribute | Accepted |
 | [0008](0008-no-travel-apis-in-mvp.md) | No flight/hotel APIs in MVP | Accepted |
+| [0010](0010-visual-design.md) | Visual design: light theme, Siro brand, team colours | Accepted |
 
 New ADR: copy [template.md](template.md) to the next number.

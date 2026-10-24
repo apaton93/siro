@@ -10,6 +10,7 @@ MVP in development. Work is tracked in Jira (project **SIRO**).
 ## Repo layout
 | Folder | Contents |
 |---|---|
+| `shared/` | `@siro/shared` – API response types used by both api and app |
 | `app/` | Frontend – React + Vite + TypeScript (mobile-first) |
 | `api/` | Backend – Azure Functions (Node + TypeScript) |
 | `db/` | `@siro/db` – Drizzle ORM schema, migrations and seed data |
@@ -52,6 +53,7 @@ Open **http://localhost:4280** – the System check should show API, Database an
 | `npm run db:generate` | Generate a migration after changing `db/src/schema.ts` |
 | `npm run build` | Production build of db, app and API |
 | `npm run typecheck` | TypeScript checks for db, app and API |
+| `npm test` | API tests (in-memory Postgres + PostGIS, no Docker needed) |
 
 ### Local URLs
 | URL | Service |
@@ -69,7 +71,7 @@ Open **http://localhost:4280** – the System check should show API, Database an
 
 ## Deployment
 GitHub Actions (`.github/workflows/azure-static-web-apps.yml`) deploys to Azure Static Web Apps:
-- **Pull request** → typecheck, lint, build, then a **preview site** (URL posted as a PR comment). Removed when the PR closes.
+- **Pull request** → typecheck, lint, test, build, then a **preview site** (URL posted as a PR comment). Removed when the PR closes.
 - **Merge to main** → same checks, then **production** deploy.
 
 Requires the `AZURE_STATIC_WEB_APPS_API_TOKEN` repo secret. Runtime settings (`DATABASE_URL`, `APPLICATIONINSIGHTS_CONNECTION_STRING`) live in the Static Web App's environment variables, never in the repo.

@@ -82,6 +82,9 @@ export const cities = pgTable(
     language: text('language').notNull(),
     timezone: text('timezone').notNull(),
     centre: geographyPoint('centre').notNull(),
+    /** Licensed city photo for cards/headers, with attribution (ADR-0010). */
+    photoUrl: text('photo_url'),
+    photoCredit: text('photo_credit'),
     createdAt: createdAt(),
   },
   (t) => [index('cities_centre_gix').using('gist', t.centre)],
@@ -114,6 +117,10 @@ export const teams = pgTable(
     cityId: uuid('city_id').references(() => cities.id), // null for national teams
     homeStadiumId: uuid('home_stadium_id').references(() => stadiums.id),
     crestUrl: text('crest_url'),
+    /** Main kit colour, e.g. #F47920. Used for fixture cards/headers (ADR-0010). */
+    primaryColour: char('primary_colour', { length: 7 }).notNull().default('#0B0B0C'),
+    /** Text colour that reads on primaryColour (black or white). */
+    onPrimaryColour: char('on_primary_colour', { length: 7 }).notNull().default('#FFFFFF'),
     createdAt: createdAt(),
   },
   (t) => [index('teams_city_idx').on(t.cityId)],
