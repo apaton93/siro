@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
+import { initials, useAuth } from '../lib/auth'
 import { Icon } from './Icon'
 
 /** Page column + fixed bottom navigation. Pages render their own top bar. */
@@ -32,16 +33,28 @@ export function AppShell() {
   )
 }
 
-/** Standard top bar: wordmark + sign in. */
+/** Standard top bar: wordmark + sign in (or the fan's initials once signed in). */
 export function TopBar() {
+  const { auth } = useAuth()
+  const location = useLocation()
+  const returnTo = encodeURIComponent(location.pathname + location.search)
+
   return (
     <header className="topbar">
-      <NavLink to="/" className="wordmark" aria-label="Siro home">
+      <Link to="/" className="wordmark" aria-label="Siro home">
         SIRO
-      </NavLink>
-      <NavLink to="/profile" className="btn btn-sm">
-        Sign in
-      </NavLink>
+      </Link>
+      {auth.status === 'signed-in' ? (
+        <Link to="/profile" className="avatar" aria-label={`Your profile (${auth.me.displayName})`}>
+          {initials(auth.me.displayName)}
+        </Link>
+      ) : auth.status === 'loading' ? (
+        <span className="avatar avatar-placeholder" aria-hidden="true" />
+      ) : (
+        <Link to={`/signin?returnTo=${returnTo}`} className="btn btn-sm">
+          Sign in
+        </Link>
+      )}
     </header>
   )
 }

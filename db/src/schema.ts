@@ -214,14 +214,22 @@ export const venues = pgTable(
 
 // ---------- Users ----------
 
+export const authProvider = pgEnum('auth_provider', ['github', 'aad'])
+
+/**
+ * A fan. Identified by sign-in provider + that provider's user id (ADR-0009).
+ * No email addresses are stored – Microsoft sign-in returns the email as the username.
+ */
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  entraId: text('entra_id').notNull().unique(),
+  authProvider: authProvider('auth_provider').notNull(),
+  /** Static Web Apps' stable per-app user id for this provider. */
+  authUserId: text('auth_user_id').notNull(),
   displayName: text('display_name').notNull(),
   homeAirportId: uuid('home_airport_id').references(() => airports.id),
   isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: createdAt(),
-})
+}, (t) => [uniqueIndex('users_auth_uq').on(t.authProvider, t.authUserId)])
 
 export const userTeams = pgTable(
   'user_teams',

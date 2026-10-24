@@ -1,10 +1,11 @@
 import type { FixtureDetail } from '@siro/shared'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useLocation, useParams } from 'react-router'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { TeamBand } from '../components/TeamBand'
 import { api, ApiRequestError, useApi } from '../lib/api'
+import { useAuth } from '../lib/auth'
 import { rgba } from '../lib/colour'
 import { daysUntil, formatKickoff, formatKm, formatShortDate } from '../lib/format'
 
@@ -61,7 +62,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
   const band = { colour: awayTeam.primaryColour, text: awayTeam.onPrimaryColour }
   const kickoff = formatKickoff(fixture.kickoffUtc, city.timezone)
   const [showSlimBar, sentinelRef] = useScrolledPast()
-  const [goingNote, setGoingNote] = useState(false)
+  const [goingCount, setGoingCount] = useState(fixture.goingCount)
   const [shareNote, setShareNote] = useState('')
 
   useEffect(() => {
@@ -150,7 +151,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         <dl className="stats">
           <div>
             <dt className="label">Fans going</dt>
-            <dd>{fixture.goingCount}</dd>
+            <dd>{goingCount}</dd>
           </div>
           <div>
             <dt className="label">Threads</dt>
@@ -162,14 +163,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           </div>
         </dl>
 
-        <div className="cta">
-          <button type="button" className="btn btn-primary btn-block" onClick={() => setGoingNote(true)} aria-describedby="going-note">
-            <Icon name="check" size={18} /> I'm going
-          </button>
-          <p id="going-note" className="cta__note" aria-live="polite">
-            {goingNote ? 'Sign-in is coming soon – then you can tell other fans you’re going.' : ''}
-          </p>
-        </div>
+        <GoingButton fixtureId={fixture.id} onCount={setGoingCount} />
 
         <nav className="tabs" aria-label="Fixture sections">
           <a href="#overview" className="active" aria-current="true">
@@ -267,6 +261,75 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         </div>
       </main>
     </>
+  )
+}
+
+/** "I'm going" toggle. Signed-out fans are sent to sign in and brought back here. */
+function GoingButton({ fixtureId, onCount }: { fixtureId: string; onCount: (n: number) => void }) {
+  const { auth } = useAuth()
+  const location = useLocation()
+  const signedIn = auth.status === 'signed-in'
+  const [going, setGoing] = useState<boolean | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+
+  // Load whether this fan is already going (private, so not part of the cached fixture data).
+  useEffect(() => {
+    if (!signedIn) return
+    const controller = new AbortController()
+    api
+      .going(fixtureId, controller.signal)
+      .then((s) => {
+        setGoing(s.going)
+        onCount(s.goingCount)
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [signedIn, fixtureId, onCount])
+
+  if (!signedIn) {
+    const returnTo = encodeURIComponent(location.pathname)
+    return (
+      <div className="cta">
+        <Link className="btn btn-primary btn-block" to={`/signin?returnTo=${returnTo}`}>
+          <Icon name="check" size={18} /> I'm going
+        </Link>
+        <p className="cta__note">Sign in to tell other fans you’re going.</p>
+      </div>
+    )
+  }
+
+  const toggle = async () => {
+    const next = !going
+    setBusy(true)
+    setMessage('')
+    try {
+      const status = await api.setGoing(fixtureId, next)
+      setGoing(status.going)
+      onCount(status.goingCount)
+      setMessage(status.going ? 'You’re on the list – see you there.' : 'Removed – you’re no longer marked as going.')
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="cta">
+      <button
+        type="button"
+        className={`btn btn-block ${going ? 'btn-going' : 'btn-primary'}`}
+        onClick={toggle}
+        disabled={busy || going === null}
+        aria-pressed={going ?? false}
+      >
+        <Icon name="check" size={18} /> {going ? 'Going – tap to undo' : "I'm going"}
+      </button>
+      <p className="cta__note" aria-live="polite">
+        {message}
+      </p>
+    </div>
   )
 }
 

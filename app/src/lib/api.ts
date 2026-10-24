@@ -1,4 +1,13 @@
-import type { ApiError, FixtureDetail, FixturesListResponse } from '@siro/shared'
+import type {
+  ApiError,
+  FixtureDetail,
+  FixturesListResponse,
+  GoingStatus,
+  Me,
+  SetMyTeamsRequest,
+  TeamsListResponse,
+  UpdateMeRequest,
+} from '@siro/shared'
 import { useEffect, useRef, useState } from 'react'
 
 export class ApiRequestError extends Error {
@@ -10,8 +19,16 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(path, { signal, headers: { Accept: 'application/json' } })
+async function request<T>(method: string, path: string, opts: { body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
+  const res = await fetch(path, {
+    method,
+    signal: opts.signal,
+    headers: {
+      Accept: 'application/json',
+      ...(opts.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+  })
   // Platform errors (e.g. Azure "Backend call failure") are HTML, not JSON.
   const body = (await res.json().catch(() => null)) as T | ApiError | null
   if (!res.ok) {
@@ -21,14 +38,26 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   return body as T
 }
 
+const get = <T,>(path: string, signal?: AbortSignal) => request<T>('GET', path, { signal })
+const enc = encodeURIComponent
+
 export const api = {
   fixtures: (params: { q?: string } = {}, signal?: AbortSignal) => {
     const query = new URLSearchParams()
     if (params.q) query.set('q', params.q)
     const qs = query.toString()
-    return getJson<FixturesListResponse>(`/api/fixtures${qs ? `?${qs}` : ''}`, signal)
+    return get<FixturesListResponse>(`/api/fixtures${qs ? `?${qs}` : ''}`, signal)
   },
-  fixture: (id: string, signal?: AbortSignal) => getJson<FixtureDetail>(`/api/fixtures/${encodeURIComponent(id)}`, signal),
+  fixture: (id: string, signal?: AbortSignal) => get<FixtureDetail>(`/api/fixtures/${enc(id)}`, signal),
+  teams: (q: string, signal?: AbortSignal) => get<TeamsListResponse>(`/api/teams${q ? `?q=${enc(q)}` : ''}`, signal),
+
+  // Signed-in fan (401 when signed out)
+  me: (signal?: AbortSignal) => get<Me>('/api/me', signal),
+  updateMe: (body: UpdateMeRequest) => request<Me>('PATCH', '/api/me', { body }),
+  setMyTeams: (body: SetMyTeamsRequest) => request<Me>('PUT', '/api/me/teams', { body }),
+  going: (fixtureId: string, signal?: AbortSignal) => get<GoingStatus>(`/api/me/going/${enc(fixtureId)}`, signal),
+  setGoing: (fixtureId: string, going: boolean) =>
+    request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),
 }
 
 export type Loadable<T> =

@@ -1,6 +1,6 @@
 # ADR-0005 Authentication via Microsoft Entra External ID
 
-**Date:** 2026-10-23 · **Status:** Accepted
+**Date:** 2026-10-23 · **Status:** Superseded for the MVP by [ADR-0009](0009-swa-built-in-auth.md)
 
 ## Context
 Need social/email sign-in without building auth; already on Azure.

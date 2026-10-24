@@ -22,6 +22,20 @@
       "when": 1792839806104,
       "tag": "0002_team_colours_city_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792842461491,
+      "tag": "0003_users_drop_entra_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792842462503,
+      "tag": "0004_users_auth_identity",
+      "breakpoints": true
     }
   ]
 }

@@ -17,7 +17,7 @@ MVP in development. Work is tracked in Jira (project **SIRO**).
 | `docs/` | Data model, architecture, user journeys and decision records (`docs/adr`) |
 
 ## Tech stack
-React · TypeScript · Vite · Azure Static Web Apps · Azure Functions · PostgreSQL + PostGIS · Drizzle ORM · Microsoft Entra External ID · Leaflet + OpenStreetMap
+React · TypeScript · Vite · Azure Static Web Apps · Azure Functions · PostgreSQL + PostGIS · Drizzle ORM · Static Web Apps auth (GitHub, Microsoft) · Leaflet + OpenStreetMap
 
 ## Getting started (Windows)
 
@@ -39,7 +39,9 @@ npm run db:migrate   # creates the tables
 npm run db:seed      # loads the example Barcelona v Dundee United data
 npm run dev          # starts app + api behind the SWA CLI
 ```
-Open **http://localhost:4280** – the System check should show API, Database and PostGIS ticks.
+Open **http://localhost:4280** – you should see the example fixture. `/status` checks the API, database and PostGIS.
+
+Signing in locally shows the SWA CLI's mock login form: type any username to simulate a GitHub or Microsoft user.
 
 ### Everyday commands
 | Command | What it does |
