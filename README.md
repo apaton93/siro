@@ -23,7 +23,7 @@ React · TypeScript · Vite · Azure Static Web Apps · Azure Functions · Postg
 
 ### Prerequisites (one-off)
 - Git
-- Node.js 22 LTS
+- Node.js 22 LTS with **npm 11** (`npm install -g npm@11.16.0`, check: `npm -v`)
 - Docker Desktop (WSL2 backend), running
 - Azure Functions Core Tools v4: `winget install Microsoft.Azure.FunctionsCoreTools` (check: `func --version`)
 - VS Code (accept the recommended extensions prompt)
