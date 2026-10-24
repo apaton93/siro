@@ -2,6 +2,7 @@
   "name": "siro",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "npm@11.16.0",
   "workspaces": [
     "shared",
     "db",
@@ -9,7 +10,8 @@
     "api"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "npm": ">=11"
   },
   "scripts": {
     "setup": "node -e \"const fs=require('fs');const t='api/local.settings.json';if(!fs.existsSync(t)){fs.copyFileSync('api/local.settings.example.json',t);console.log('Created '+t)}else{console.log(t+' already exists')}\"",
@@ -23,7 +25,7 @@
     "dev": "concurrently -k -n app,api,swa -c magenta,cyan,green \"npm run dev -w @siro/app\" \"npm run dev -w @siro/api\" \"swa start siro\"",
     "build": "npm run build -w @siro/db && npm run build -w @siro/app && npm run build -w @siro/api",
     "typecheck": "npm run typecheck -w @siro/db && npm run typecheck -w @siro/api && npx -w @siro/app tsc -b",
-    "test": "npm run test -w @siro/api",
+    "test": "npm run test -w @siro/api && npm run test -w @siro/app",
     "package:api": "node api/scripts/package.mjs"
   },
   "devDependencies": {
