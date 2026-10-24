@@ -86,3 +86,43 @@ export interface FixtureDetail extends FixtureSummary {
 export interface ApiError {
   error: string
 }
+
+// ---------- Signed-in fan (/api/me) ----------
+
+export type AuthProvider = 'github' | 'aad'
+
+export interface MyTeam extends TeamRef {
+  isPrimary: boolean
+}
+
+export interface Me {
+  id: string
+  displayName: string
+  authProvider: AuthProvider
+  isAdmin: boolean
+  teams: MyTeam[]
+}
+
+export interface UpdateMeRequest {
+  displayName: string
+}
+
+export interface SetMyTeamsRequest {
+  teams: { teamId: string; isPrimary: boolean }[]
+}
+
+export interface GoingStatus {
+  going: boolean
+  goingCount: number
+}
+
+export interface TeamsListResponse {
+  teams: TeamRef[]
+}
+
+/** Limits shared by the API (validation) and the app (form hints). */
+export const LIMITS = {
+  displayNameMin: 2,
+  displayNameMax: 30,
+  maxTeams: 5,
+} as const

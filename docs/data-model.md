@@ -180,3 +180,6 @@ Source of truth is now `db/src/schema.ts`. Small additions made while implementi
 - `posts.hidden` for moderation.
 - `created_at` on all activity tables; unique attendance per user per fixture.
 - Location columns are plain `geography` (SRID 4326 default) – drizzle-kit can't emit `geography(Point,4326)`.
+
+## Sign-in (SIRO-6)
+- `users.entra_id` replaced by `auth_provider` (`github` | `aad`) + `auth_user_id`, unique together (ADR-0009). No email addresses are stored.

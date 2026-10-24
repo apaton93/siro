@@ -2,3 +2,5 @@
 // Every function module registers itself with app.http(...) when imported.
 import './functions/health'
 import './functions/fixtures'
+import './functions/teams'
+import './functions/me'
