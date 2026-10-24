@@ -1,6 +1,12 @@
+import { createDb, schema } from '@siro/db'
+import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 
+/** Any Drizzle Postgres database using the Siro schema (node-postgres in Azure, PGlite in tests). */
+export type Db = PgDatabase<PgQueryResultHKT, typeof schema>
+
 let pool: Pool | undefined
+let db: Db | undefined
 
 /**
  * One shared connection pool per Functions instance.
@@ -27,4 +33,17 @@ export function getPool(): Pool {
     pool.on('error', (err) => console.error('Postgres pool error', err))
   }
   return pool
+}
+
+/** Shared Drizzle client for function handlers. */
+export function getDb(): Db {
+  if (!db) {
+    db = createDb(getPool())
+  }
+  return db
+}
+
+/** Tests only: swap in another database (e.g. in-memory PGlite). */
+export function setDbForTests(testDb: Db): void {
+  db = testDb
 }
