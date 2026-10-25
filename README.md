@@ -91,3 +91,6 @@ Remove-Item Env:DATABASE_URL
 
 ### Champions League 2026/27 data
 `npm run db:import-ucl` adds the league phase (36 clubs, 144 matches, venues, airports) from `db/src/ucl/ucl-2026-27.ts` and removes the example fixture. It only adds what's missing, so it's safe to re-run and won't overwrite edits made in `/admin`. Run a migration first (`db:migrate`), then the import, with `DATABASE_URL` set for production.
+
+### City photos
+`npm run db:import-photos` adds Wikimedia Commons photos (with credits) to cities that don't have one. It never replaces a photo set in `/admin`. To choose or change a photo, edit the city in `/admin` and use **Find a photo on Wikimedia Commons**.
