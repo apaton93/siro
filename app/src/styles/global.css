@@ -1061,3 +1061,38 @@ select.input {
 .comp-hero {
   position: relative;
 }
+
+/* ---------- Fixture card: photo-first layout ---------- */
+/* Text stays in the bottom third (on solid colour); the top quarter shows the city untinted. */
+
+.fixture-card .team-band {
+  padding: 0 16px 10px;
+  gap: 3px;
+}
+
+.fixture-card .fixture-card__teams {
+  font-size: 19px;
+  line-height: 1.05;
+}
+
+.fixture-card .fixture-card__away {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.fixture-card .team-band > .band-stripes {
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 60%);
+  mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 60%);
+}
+
+/* Quieter photo credit, so the city photo stays the focus. */
+.band-credit {
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  background: rgba(0, 0, 0, 0.38);
+  color: rgba(255, 255, 255, 0.92);
+}
