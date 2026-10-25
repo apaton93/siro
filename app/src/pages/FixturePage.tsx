@@ -2,6 +2,7 @@ import { isTravelBlocked, type FanAccess, type FixtureDetail } from '@siro/share
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { Collapsible } from '../components/Collapsible'
+import { FansStaying } from '../components/FansStaying'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { TeamBand } from '../components/TeamBand'
@@ -271,6 +272,8 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
                 </p>
               ))}
               {guide('areas').length === 0 && <p className="prose">No details yet.</p>}
+              <h3 className="subhead">Where fans are staying</h3>
+              <FansStaying fixtureId={fixture.id} refreshKey={goingCount} />
               <a
                 className="btn btn-block"
                 href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city.name)}`}
