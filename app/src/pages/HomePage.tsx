@@ -123,31 +123,31 @@ function MyTeams() {
 
 function MyTeamsFixtures({ teamIds }: { teamIds: string[] }) {
   const key = teamIds.join(',')
-  const upcoming = useApi(`fixtures:teams:${key}`, (signal) => api.fixtures({ teams: teamIds }, signal))
-  const results = useApi(`results:teams:${key}`, (signal) => api.fixtures({ teams: teamIds, when: 'results' }, signal))
+  const upcoming = useApi(`fixtures:teams:${key}`, (signal) => api.fixtures({ teams: teamIds, awayOnly: true }, signal))
+  const results = useApi(`results:teams:${key}`, (signal) => api.fixtures({ teams: teamIds, awayOnly: true, when: 'results' }, signal))
 
   return (
     <>
       <section className="stack" aria-labelledby="upcoming-heading">
         <h1 id="upcoming-heading" className="display" style={{ fontSize: 22 }}>
-          Upcoming
+          Upcoming away days
         </h1>
         <FixtureList
           state={upcoming.state}
           reload={upcoming.reload}
           label="upcoming fixtures"
-          empty={<StateMessage title="Nothing coming up">No fixtures for your teams yet – check back soon.</StateMessage>}
+          empty={<StateMessage title="Nothing coming up">No away fixtures for your teams yet – check back soon.</StateMessage>}
         />
       </section>
       <section className="stack" aria-labelledby="results-heading">
         <h2 id="results-heading" className="display" style={{ fontSize: 22 }}>
-          Recent results
+          Recent away results
         </h2>
         <FixtureList
           state={results.state}
           reload={results.reload}
           label="recent results"
-          empty={<p className="cta__note">No results yet.</p>}
+          empty={<p className="cta__note">No away results yet.</p>}
         />
       </section>
     </>

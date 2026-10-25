@@ -10,13 +10,14 @@ const CODE_RE = /^[A-Za-z]{2,6}$/
 
 /**
  * GET /api/fixtures – upcoming fixtures, or `when=results` for recent finished games.
- * Filters: team={uuid}, teams={uuid},{uuid}… (any of), competition={uuid or code, e.g. UCL}, q={text}.
+ * Filters: team={uuid}, teams={uuid},{uuid}… (any of; add side=away for only their away games), competition={uuid or code, e.g. UCL}, q={text}.
  */
 export async function fixturesList(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const team = request.query.get('team')
   const teams = request.query.get('teams')
   const competition = request.query.get('competition')
   const when = request.query.get('when') ?? 'upcoming'
+  const side = request.query.get('side')
   const q = request.query.get('q')?.trim()
 
   if (team && !isUuid(team)) return badRequest('team must be a valid id')
@@ -28,12 +29,14 @@ export async function fixturesList(request: HttpRequest, context: InvocationCont
     return badRequest('competition must be a valid id or code')
   }
   if (when !== 'upcoming' && when !== 'results') return badRequest('when must be upcoming or results')
+  if (side && side !== 'away') return badRequest('side must be away')
   if (q && q.length > MAX_QUERY_LENGTH) return badRequest(`q must be ${MAX_QUERY_LENGTH} characters or fewer`)
 
   const competitionIsId: boolean = isUuid(competition)
   const filters: ListFixturesFilters = {
     teamId: team ?? undefined,
     teamIds,
+    awayOnly: side === 'away',
     competitionId: competitionIsId && competition ? competition : undefined,
     competitionCode: competition && !competitionIsId ? competition.toUpperCase() : undefined,
     when,

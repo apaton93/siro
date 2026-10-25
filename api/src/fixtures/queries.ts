@@ -59,6 +59,8 @@ export interface ListFixturesFilters {
   teamId?: string
   /** Only fixtures involving any of these teams. */
   teamIds?: string[]
+  /** With teamIds: only games where one of them is the away side (their away days). */
+  awayOnly?: boolean
   competitionId?: string
   /** Competition code, e.g. UCL. */
   competitionCode?: string
@@ -80,7 +82,11 @@ export async function listFixtures(db: Db, filters: ListFixturesFilters = {}): P
     : [gte(fixtures.kickoffUtc, from), ne(fixtures.status, 'finished')]
 
   if (filters.teamIds?.length) {
-    where.push(or(inArray(fixtures.homeTeamId, filters.teamIds), inArray(fixtures.awayTeamId, filters.teamIds)))
+    where.push(
+      filters.awayOnly
+        ? inArray(fixtures.awayTeamId, filters.teamIds)
+        : or(inArray(fixtures.homeTeamId, filters.teamIds), inArray(fixtures.awayTeamId, filters.teamIds)),
+    )
   }
   if (filters.competitionCode) {
     where.push(eq(competitions.code, filters.competitionCode))

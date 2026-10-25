@@ -49,6 +49,8 @@ export interface FixtureFilters {
   /** Competition code, e.g. UCL. */
   competition?: string
   when?: 'upcoming' | 'results'
+  /** With teams: only games where one of them is the away side. */
+  awayOnly?: boolean
 }
 
 const get = <T,>(path: string, signal?: AbortSignal) => request<T>('GET', path, { signal })
@@ -61,6 +63,7 @@ export const api = {
     if (params.teams?.length) query.set('teams', params.teams.join(','))
     if (params.competition) query.set('competition', params.competition)
     if (params.when) query.set('when', params.when)
+    if (params.awayOnly) query.set('side', 'away')
     const qs = query.toString()
     return get<FixturesListResponse>(`/api/fixtures${qs ? `?${qs}` : ''}`, signal)
   },
