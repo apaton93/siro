@@ -81,7 +81,7 @@ Requires the `AZURE_STATIC_WEB_APPS_API_TOKEN` repo secret. Runtime settings (`D
 Database migrations against Azure are run manually for now (`DATABASE_URL=... npm run db:migrate`).
 
 ## Admin
-Fixtures, teams, stadiums, cities, airports and guides are managed at `/admin` (signed-in admins only).
+Fixtures, teams, stadiums, cities, airports and guides are managed at `/admin` (signed-in admins only), backed by `/api/manage/*` – Azure Functions reserves routes starting with `admin`.
 To make yourself an admin, sign in once, then from PowerShell:
 ```powershell
 $env:DATABASE_URL = '<connection string>'   # leave unset for local

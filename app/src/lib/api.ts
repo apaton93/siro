@@ -63,12 +63,12 @@ export const api = {
     request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),
 
   // Admins only (403 otherwise)
-  adminReference: (signal?: AbortSignal) => get<AdminReference>('/api/admin/reference', signal),
+  adminReference: (signal?: AbortSignal) => get<AdminReference>('/api/manage/reference', signal),
   adminSave: (entity: AdminEntity, id: string | null, body: unknown) =>
     id
-      ? request<AdminSaveResponse>('PUT', `/api/admin/${entity}/${enc(id)}`, { body })
-      : request<AdminSaveResponse>('POST', `/api/admin/${entity}`, { body }),
-  adminDelete: (entity: AdminEntity, id: string) => request<null>('DELETE', `/api/admin/${entity}/${enc(id)}`),
+      ? request<AdminSaveResponse>('PUT', `/api/manage/${entity}/${enc(id)}`, { body })
+      : request<AdminSaveResponse>('POST', `/api/manage/${entity}`, { body }),
+  adminDelete: (entity: AdminEntity, id: string) => request<null>('DELETE', `/api/manage/${entity}/${enc(id)}`),
 }
 
 export type Loadable<T> =

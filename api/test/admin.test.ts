@@ -24,7 +24,7 @@ function req(method: string, params: Record<string, string>, opts: { as?: Fan; b
   if (opts.body !== undefined) headers['content-type'] = 'application/json'
   return new HttpRequest({
     method,
-    url: `http://localhost/api/admin/${Object.values(params).join('/')}`,
+    url: `http://localhost/api/manage/${Object.values(params).join('/')}`,
     headers,
     params,
     body: opts.body === undefined ? undefined : { string: JSON.stringify(opts.body) },
