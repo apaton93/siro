@@ -240,3 +240,83 @@ export interface AdminReference {
 export interface AdminSaveResponse {
   id: string
 }
+
+// ---------- Discussion ----------
+
+export const THREAD_CATEGORIES = ['general', 'flights', 'hotels', 'pubs', 'transport', 'tickets', 'meetups'] as const
+export type ThreadCategory = (typeof THREAD_CATEGORIES)[number]
+
+export const DISCUSSION_LIMITS = {
+  titleMin: 3,
+  titleMax: 100,
+  bodyMax: 2000,
+  /** Seconds a fan must wait between posts. */
+  cooldownSeconds: 20,
+  /** Reports from different fans that hide a post automatically. */
+  reportsToHide: 3,
+}
+
+export interface Author {
+  id: string
+  displayName: string
+}
+
+export interface ThreadSummary {
+  id: string
+  fixtureId: string
+  category: ThreadCategory
+  title: string
+  author: Author
+  createdAt: string
+  /** Replies plus the opening post. */
+  postCount: number
+  lastPostAt: string
+}
+
+export interface ThreadsListResponse {
+  threads: ThreadSummary[]
+}
+
+export interface PostInfo {
+  id: string
+  author: Author
+  /** Null when the post has been hidden by moderation. */
+  body: string | null
+  hidden: boolean
+  createdAt: string
+  /** Only set when signed in. */
+  mine: boolean
+  reportedByMe: boolean
+}
+
+export interface ThreadDetail {
+  thread: ThreadSummary
+  fixture: { id: string; homeTeam: string; awayTeam: string; kickoffUtc: string }
+  posts: PostInfo[]
+}
+
+export interface CreateThreadRequest {
+  fixtureId: string
+  category: ThreadCategory
+  title: string
+  body: string
+}
+
+export interface CreatePostRequest {
+  body: string
+}
+
+/** Admin moderation queue: posts with reports, or hidden. */
+export interface ReportedPost {
+  id: string
+  body: string
+  hidden: boolean
+  reportedCount: number
+  createdAt: string
+  author: Author
+  thread: { id: string; title: string; fixtureId: string }
+}
+
+export interface ReportedPostsResponse {
+  posts: ReportedPost[]
+}

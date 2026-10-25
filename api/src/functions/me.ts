@@ -1,10 +1,9 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
 import { isTravelBlocked, LIMITS, type ApiError, type GoingStatus, type Me } from '@siro/shared'
-import { getClientPrincipal } from '../auth'
 import { getDb } from '../db'
-import { badRequest, isUuid, json, notFound, serverError } from '../http'
+import { badRequest, isUuid, json, notFound } from '../http'
+import { readJson, signedIn } from '../session'
 import {
-  ensureUser,
   fixtureFanAccess,
   getGoing,
   getMe,
@@ -14,35 +13,6 @@ import {
   validateDisplayName,
   type TeamSelection,
 } from '../users/queries'
-
-/** Personal data – never cache. */
-const PRIVATE = { 'Cache-Control': 'no-store' }
-
-type Handler = (request: HttpRequest, userId: string) => Promise<HttpResponseInit>
-
-/** Require a signed-in fan (creating their record on first visit) and handle unexpected errors. */
-function signedIn(name: string, handler: Handler) {
-  return async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    const principal = getClientPrincipal(request)
-    if (!principal) return json(401, { error: 'Sign in required' }, PRIVATE)
-    try {
-      const userId = await ensureUser(getDb(), principal)
-      const res = await handler(request, userId)
-      return { ...res, headers: { ...PRIVATE, ...(res.headers as Record<string, string>) } }
-    } catch (err) {
-      context.error(`${name} failed`, err)
-      return serverError()
-    }
-  }
-}
-
-async function readJson(request: HttpRequest): Promise<unknown> {
-  try {
-    return await request.json()
-  } catch {
-    return undefined
-  }
-}
 
 // ---------- Profile ----------
 
@@ -55,7 +25,9 @@ export const mePatch = signedIn('mePatch', async (req, userId) => {
   const name = validateDisplayName(body?.displayName)
   if ('error' in name) return badRequest(name.error)
 
-  await setDisplayName(getDb(), userId, name.value)
+  if ((await setDisplayName(getDb(), userId, name.value)) === 'taken') {
+    return json<ApiError>(409, { error: 'That name’s taken – try another' })
+  }
   return json<Me>(200, await getMe(getDb(), userId))
 })
 

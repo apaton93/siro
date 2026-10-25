@@ -38,12 +38,34 @@ export function defaultDisplayName(p: ClientPrincipal): string {
   return `Fan ${p.userId.replace(/[^a-z0-9]/gi, '').slice(0, 4).toUpperCase() || 'NEW'}`
 }
 
+/** True if a database error is a duplicate value (e.g. a display name that's taken). */
+export const isUniqueViolation = (err: unknown) => {
+  const e = err as { code?: unknown; cause?: { code?: unknown } }
+  return (e?.code ?? e?.cause?.code) === '23505'
+}
+
 /** Find the fan for this sign-in, creating them on first visit. Returns the user id. */
 export async function ensureUser(db: Db, p: ClientPrincipal): Promise<string> {
-  await db
-    .insert(users)
-    .values({ authProvider: p.provider, authUserId: p.userId, displayName: defaultDisplayName(p) })
-    .onConflictDoNothing({ target: [users.authProvider, users.authUserId] })
+  const [existing] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.authProvider, p.provider), eq(users.authUserId, p.userId)))
+  if (existing) return existing.id
+
+  // New fan. If their default name is taken, add a number ("tangerine_terror 4821").
+  const base = defaultDisplayName(p)
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const displayName = attempt === 0 ? base : `${base.slice(0, 25)} ${1000 + Math.floor(Math.random() * 9000)}`
+    try {
+      await db
+        .insert(users)
+        .values({ authProvider: p.provider, authUserId: p.userId, displayName })
+        .onConflictDoNothing({ target: [users.authProvider, users.authUserId] })
+      break
+    } catch (err) {
+      if (!isUniqueViolation(err) || attempt === 5) throw err
+    }
+  }
 
   const [row] = await db
     .select({ id: users.id })
@@ -68,8 +90,15 @@ export async function getMe(db: Db, userId: string): Promise<Me> {
   return { ...user, teams: myTeams }
 }
 
-export async function setDisplayName(db: Db, userId: string, displayName: string): Promise<void> {
-  await db.update(users).set({ displayName }).where(eq(users.id, userId))
+/** Rename the fan. Names are unique ignoring case. */
+export async function setDisplayName(db: Db, userId: string, displayName: string): Promise<'ok' | 'taken'> {
+  try {
+    await db.update(users).set({ displayName }).where(eq(users.id, userId))
+    return 'ok'
+  } catch (err) {
+    if (isUniqueViolation(err)) return 'taken'
+    throw err
+  }
 }
 
 export type TeamSelection = { teamId: string; isPrimary: boolean }[]
