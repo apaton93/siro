@@ -8,7 +8,7 @@ import { api, ApiRequestError, useApi } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { rgba } from '../lib/colour'
 import { fanAccessInfo } from '../lib/fanAccess'
-import { daysUntil, formatKickoff, formatKm, formatShortDate } from '../lib/format'
+import { daysUntil, formatKm, formatShortDate, kickoffParts } from '../lib/format'
 
 export function FixturePage() {
   const { id = '' } = useParams()
@@ -59,9 +59,9 @@ function BackLink() {
 }
 
 function Fixture({ fixture }: { fixture: FixtureDetail }) {
-  const { homeTeam, awayTeam, city, stadium, competition } = fixture
+  const { homeTeam, awayTeam, city, stadium } = fixture
   const band = { colour: awayTeam.primaryColour, text: awayTeam.onPrimaryColour }
-  const kickoff = formatKickoff(fixture.kickoffUtc, city.timezone)
+  const kickoff = kickoffParts(fixture.kickoffUtc, city.timezone)
   const [showSlimBar, sentinelRef] = useScrolledPast()
   const [goingCount, setGoingCount] = useState(fixture.goingCount)
   const [shareNote, setShareNote] = useState('')
@@ -99,7 +99,9 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
             <strong>
               {homeTeam.name} v {awayTeam.name}
             </strong>
-            <span>{formatShortDate(fixture.kickoffUtc, city.timezone)} · {stadium.name}</span>
+            <span>
+              {formatShortDate(fixture.kickoffUtc, city.timezone)} · {city.name}
+            </span>
           </div>
         </div>
       </div>
@@ -111,7 +113,8 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           textColour={band.text}
           photoUrl={city.photoUrl}
           photoCredit={city.photoCredit}
-          solidUntil={55}
+          solidUntil={30}
+          clearTop={45}
           watermark
         >
           <div className="fixture-hero__bar">
@@ -123,25 +126,22 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
             </button>
           </div>
 
-          <div className="fixture-hero__row">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span className="fixture-hero__kicker">{competition.name}</span>
-              {fixture.stage && <span className="fixture-hero__sub">{fixture.stage}</span>}
-            </div>
+          <div className="fixture-hero__row" style={{ justifyContent: 'flex-end' }}>
             <span className="badge" style={{ background: rgba(band.text, 0.14) }}>
               {homeTeam.crestUrl ? <img src={homeTeam.crestUrl} alt={`${homeTeam.name} crest`} /> : homeTeam.shortName}
             </span>
           </div>
 
-          <h1 className="display">{homeTeam.name}</h1>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <time dateTime={fixture.kickoffUtc} style={{ fontSize: 14, fontWeight: 600 }}>
-              {kickoff}
+          <div className="fixture-hero__bottom">
+            <div>
+              <h1 className="display">{homeTeam.name}</h1>
+              <span className="fixture-hero__sub">{city.name}</span>
+            </div>
+            <time className="fixture-hero__time" dateTime={fixture.kickoffUtc}>
+              <strong>{kickoff.date}</strong>
+              <span>{kickoff.local}</span>
+              {kickoff.uk && <span className="fixture-hero__sub">{kickoff.uk}</span>}
             </time>
-            <span className="fixture-hero__sub">
-              {stadium.name}, {city.name}
-            </span>
           </div>
           <span className="visually-hidden" aria-live="polite">
             {shareNote}

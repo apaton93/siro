@@ -1,11 +1,13 @@
 import { LIMITS, type Me, type MyTeam, type TeamRef } from '@siro/shared'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { TopBar } from '../components/AppShell'
+import { Avatar } from '../components/Avatar'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { api, useApi, useDebounced } from '../lib/api'
-import { initials, signOutUrl, useAuth } from '../lib/auth'
+import { signOutUrl, useAuth } from '../lib/auth'
+import { makeAvatar } from '../lib/avatarImage'
 import { SignInButtons } from './SignInPage'
 
 export function ProfilePage() {
@@ -52,9 +54,7 @@ function Profile({ me }: { me: Me }) {
   return (
     <>
       <header style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <span className="avatar avatar-lg" aria-hidden="true">
-          {initials(me.displayName)}
-        </span>
+        <Avatar name={me.displayName} url={me.avatarUrl} size="lg" />
         <div>
           <h1 className="display" style={{ fontSize: 22 }}>
             {me.displayName}
@@ -63,6 +63,7 @@ function Profile({ me }: { me: Me }) {
         </div>
       </header>
 
+      <PhotoForm me={me} />
       <NameForm me={me} />
       <TeamsEditor me={me} />
 
@@ -77,6 +78,57 @@ function Profile({ me }: { me: Me }) {
         </a>
       </div>
     </>
+  )
+}
+
+function PhotoForm({ me }: { me: Me }) {
+  const { setMe } = useAuth()
+  const [status, setStatus] = useState<{ kind: 'idle' | 'saving' | 'saved' } | { kind: 'error'; message: string }>({ kind: 'idle' })
+
+  const run = async (action: () => Promise<Me>, done: string) => {
+    setStatus({ kind: 'saving' })
+    try {
+      setMe(await action())
+      setStatus({ kind: 'saved' })
+      setTimeout(() => setStatus((s) => (s.kind === 'saved' ? { kind: 'idle' } : s)), 2500)
+      return done
+    } catch (err) {
+      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Something went wrong' })
+    }
+  }
+
+  const choose = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow picking the same file again
+    if (file) void run(async () => api.uploadAvatar(await makeAvatar(file)), 'Photo updated.')
+  }
+
+  return (
+    <section className="panel" aria-labelledby="photo-heading">
+      <span id="photo-heading" className="kicker">
+        Profile photo
+      </span>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <label className={`btn btn-dark ${status.kind === 'saving' ? 'is-disabled' : ''}`}>
+          {me.avatarUrl ? 'Change photo' : 'Add a photo'}
+          <input type="file" accept="image/*" className="visually-hidden" onChange={choose} disabled={status.kind === 'saving'} />
+        </label>
+        {me.avatarUrl && (
+          <button type="button" className="btn" onClick={() => void run(api.removeAvatar, 'Photo removed.')} disabled={status.kind === 'saving'}>
+            Remove
+          </button>
+        )}
+      </div>
+      <p className="cta__note" aria-live="polite">
+        {status.kind === 'saving'
+          ? 'Uploading…'
+          : status.kind === 'saved'
+            ? 'Saved.'
+            : status.kind === 'error'
+              ? status.message
+              : 'Shown next to your posts. We crop it to a square and remove location data.'}
+      </p>
+    </section>
   )
 }
 

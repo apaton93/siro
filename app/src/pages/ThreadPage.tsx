@@ -2,10 +2,11 @@ import { DISCUSSION_LIMITS, type PostInfo } from '@siro/shared'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { TopBar } from '../components/AppShell'
+import { Avatar } from '../components/Avatar'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { api, ApiRequestError, useApi } from '../lib/api'
-import { initials, useAuth } from '../lib/auth'
+import { useAuth } from '../lib/auth'
 import { CATEGORY_LABELS } from '../lib/discussion'
 import { formatRelative } from '../lib/format'
 import { SignInButtons } from './SignInPage'
@@ -77,9 +78,7 @@ function Post({ post }: { post: PostInfo }) {
 
   return (
     <li className="post">
-      <span className="avatar avatar-sm" aria-hidden="true">
-        {initials(post.author.displayName)}
-      </span>
+      <Avatar name={post.author.displayName} url={post.author.avatarUrl} size="sm" />
       <div className="post__main">
         <div className="post__meta">
           <strong>{post.author.displayName}</strong>

@@ -57,6 +57,13 @@
       "when": 1792929665460,
       "tag": "0007_unique_names_post_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792930606040,
+      "tag": "0008_user_avatars",
+      "breakpoints": true
     }
   ]
 }

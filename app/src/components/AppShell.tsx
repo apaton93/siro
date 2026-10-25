@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
-import { initials, useAuth } from '../lib/auth'
+import { useAuth } from '../lib/auth'
+import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 
 /** Page column + fixed bottom navigation. Pages render their own top bar. */
@@ -45,8 +46,8 @@ export function TopBar() {
         SIRO
       </Link>
       {auth.status === 'signed-in' ? (
-        <Link to="/profile" className="avatar" aria-label={`Your profile (${auth.me.displayName})`}>
-          {initials(auth.me.displayName)}
+        <Link to="/profile" className="avatar-link" aria-label={`Your profile (${auth.me.displayName})`}>
+          <Avatar name={auth.me.displayName} url={auth.me.avatarUrl} />
         </Link>
       ) : auth.status === 'loading' ? (
         <span className="avatar avatar-placeholder" aria-hidden="true" />

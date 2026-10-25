@@ -1,8 +1,9 @@
-import { attendances, fixtures, teams, userTeams, users } from '@siro/db'
+import { attendances, fixtures, teams, userAvatars, userTeams, users } from '@siro/db'
 import { LIMITS, type FanAccess, type GoingStatus, type Me, type TeamRef } from '@siro/shared'
 import { and, asc, count, desc, eq, ilike, inArray } from 'drizzle-orm'
 import type { ClientPrincipal } from '../auth'
 import type { Db } from '../db'
+import { avatarUrl } from './avatars'
 
 const teamCols = {
   id: teams.id,
@@ -76,8 +77,15 @@ export async function ensureUser(db: Db, p: ClientPrincipal): Promise<string> {
 
 export async function getMe(db: Db, userId: string): Promise<Me> {
   const [user] = await db
-    .select({ id: users.id, displayName: users.displayName, authProvider: users.authProvider, isAdmin: users.isAdmin })
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      authProvider: users.authProvider,
+      isAdmin: users.isAdmin,
+      avatarAt: userAvatars.updatedAt,
+    })
     .from(users)
+    .leftJoin(userAvatars, eq(userAvatars.userId, users.id))
     .where(eq(users.id, userId))
 
   const myTeams = await db
@@ -87,7 +95,8 @@ export async function getMe(db: Db, userId: string): Promise<Me> {
     .where(eq(userTeams.userId, userId))
     .orderBy(desc(userTeams.isPrimary), asc(teams.name))
 
-  return { ...user, teams: myTeams }
+  const { avatarAt, ...rest } = user
+  return { ...rest, avatarUrl: avatarUrl(user.id, avatarAt), teams: myTeams }
 }
 
 /** Rename the fan. Names are unique ignoring case. */
