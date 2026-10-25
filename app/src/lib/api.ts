@@ -4,6 +4,10 @@ import type {
   AdminSaveResponse,
   ApiError,
   SetStayRequest,
+  PendingVenuesResponse,
+  SuggestVenueRequest,
+  VenueDetail,
+  VenuesResponse,
   StaysResponse,
   CreatePostRequest,
   CreateThreadRequest,
@@ -15,6 +19,7 @@ import type {
   FixtureDetail,
   FixturesListResponse,
   GoingStatus,
+  NextGoingResponse,
   Me,
   SetMyTeamsRequest,
   TeamsListResponse,
@@ -94,6 +99,7 @@ export const api = {
   stays: (fixtureId: string, signal?: AbortSignal) => get<StaysResponse>(`/api/me/stays/${enc(fixtureId)}`, signal),
   setStay: (fixtureId: string, body: SetStayRequest) => request<StaysResponse>('PUT', `/api/me/stays/${enc(fixtureId)}`, { body }),
   removeStay: (fixtureId: string) => request<StaysResponse>('DELETE', `/api/me/stays/${enc(fixtureId)}`),
+  nextGoing: (signal?: AbortSignal) => get<NextGoingResponse>('/api/me/next-going', signal),
   going: (fixtureId: string, signal?: AbortSignal) => get<GoingStatus>(`/api/me/going/${enc(fixtureId)}`, signal),
   setGoing: (fixtureId: string, going: boolean) =>
     request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),
@@ -117,6 +123,13 @@ export const api = {
   createThread: (body: CreateThreadRequest) => request<AdminSaveResponse>('POST', '/api/discuss/threads', { body }),
   createPost: (threadId: string, body: CreatePostRequest) =>
     request<AdminSaveResponse>('POST', `/api/discuss/threads/${enc(threadId)}/posts`, { body }),
+  venues: (fixtureId: string, signal?: AbortSignal) => get<VenuesResponse>(`/api/fixtures/${enc(fixtureId)}/venues`, signal),
+  venue: (id: string, signal?: AbortSignal) => get<VenueDetail>(`/api/venues/${enc(id)}`, signal),
+  suggestVenue: (body: SuggestVenueRequest) => request<AdminSaveResponse>('POST', '/api/discuss/venues', { body }),
+  addVenueTip: (id: string, text: string) => request<AdminSaveResponse>('POST', `/api/discuss/venues/${enc(id)}/tips`, { body: { text } }),
+  pendingVenues: (signal?: AbortSignal) => get<PendingVenuesResponse>('/api/manage/venues', signal),
+  setVenueStatus: (id: string, status: 'approved' | 'rejected', awayFriendly?: boolean) =>
+    request<null>('PUT', `/api/manage/venues/${enc(id)}/status`, { body: { status, awayFriendly } }),
   reportPost: (postId: string) => request<{ hidden: boolean }>('POST', `/api/discuss/posts/${enc(postId)}/report`),
 }
 

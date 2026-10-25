@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { encodeClientPrincipal } from '../src/auth'
 import { setDbForTests } from '../src/db'
-import { goingDelete, goingGet, goingPut, meGet, mePatch, meTeamsPut } from '../src/functions/me'
+import { goingDelete, goingGet, goingPut, meGet, mePatch, meTeamsPut, nextGoingGet } from '../src/functions/me'
 import { teamsList } from '../src/functions/teams'
 import { createTestDb, type TestDb } from './test-db'
 
@@ -224,5 +224,26 @@ describe('GET /api/teams', () => {
 
     const found = (await teamsList(req('GET', 'teams?q=dun'), ctx())).jsonBody as TeamsListResponse
     expect(found.teams.map((x) => x.name)).toEqual(['Dundee United'])
+  })
+})
+
+describe('next fixture I am going to', () => {
+  const next = async (fan: Fan) =>
+    ((await nextGoingGet(req('GET', 'me/next-going', { fan }), ctx())).jsonBody as { fixtureId: string | null }).fixtureId
+  const going = (fn: typeof goingGet, method: string) => fn(req(method, `me/going/${fixtureId}`, { fan: githubFan, params: { fixtureId } }), ctx())
+
+  it('returns the soonest upcoming fixture, ignoring ones long finished', async () => {
+    await going(goingDelete, 'DELETE')
+    expect(await next(githubFan)).toBeNull()
+    await going(goingPut, 'PUT')
+    expect(await next(githubFan)).toBe(fixtureId)
+    const [{ kickoffUtc }] = await t.db.select({ kickoffUtc: fixtures.kickoffUtc }).from(fixtures).where(eq(fixtures.id, fixtureId))
+    await t.db.update(fixtures).set({ kickoffUtc: new Date(Date.now() - 5 * 3600_000) }).where(eq(fixtures.id, fixtureId))
+    try {
+      expect(await next(githubFan)).toBeNull()
+    } finally {
+      await t.db.update(fixtures).set({ kickoffUtc }).where(eq(fixtures.id, fixtureId))
+      await going(goingDelete, 'DELETE')
+    }
   })
 })

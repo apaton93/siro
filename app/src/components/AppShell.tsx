@@ -5,19 +5,21 @@ import { Icon } from './Icon'
 
 /** Page column + fixed bottom navigation. Pages render their own top bar. */
 export function AppShell() {
+  const { pathname } = useLocation()
+  const onMap = pathname === '/map' || /^\/fixtures\/[^/]+\/map$/.test(pathname)
   return (
     <div className="shell">
       <Outlet />
       <nav className="bottom-nav" aria-label="Main">
         <ul>
           <li>
-            <NavLink to="/" end>
+            <NavLink to="/" end className={({ isActive }) => (isActive && !onMap ? 'active' : '')}>
               <Icon name="home" />
               Fixtures
             </NavLink>
           </li>
           <li>
-            <NavLink to="/map">
+            <NavLink to="/map" className={onMap ? 'active' : undefined} aria-current={onMap ? 'page' : undefined}>
               <Icon name="pin" />
               Map
             </NavLink>

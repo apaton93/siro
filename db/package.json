@@ -14,6 +14,7 @@
     "make-admin": "tsx src/make-admin.ts",
     "import-ucl": "tsx src/import-ucl.ts",
     "import-photos": "tsx src/import-photos.ts",
+    "import-venues": "tsx src/import-venues.ts",
     "import-guides": "tsx src/import-guides.ts"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ import {
   STAY_MAX_KM,
   type ApiError,
   type GoingStatus,
+  type NextGoingResponse,
   type Me,
   type SetStayRequest,
   type StaysResponse,
@@ -18,6 +19,7 @@ import { deleteAvatar, processAvatar, saveAvatar } from '../users/avatars'
 import {
   fixtureFanAccess,
   getGoing,
+  nextGoing,
   getMe,
   setDisplayName,
   setGoing,
@@ -139,6 +141,11 @@ const goingHandler = (going: boolean | null) =>
     return json<GoingStatus>(200, status)
   })
 
+/** GET /api/me/next-going – { fixtureId } of the fan's next fixture they're going to, or null. */
+export const nextGoingGet = signedIn('nextGoingGet', async (_req, userId) =>
+  json<NextGoingResponse>(200, { fixtureId: await nextGoing(getDb(), userId) }),
+)
+
 /** GET /api/me/going/{fixtureId} */
 export const goingGet = goingHandler(null)
 /** PUT /api/me/going/{fixtureId} – mark as going (idempotent). */
@@ -154,6 +161,7 @@ app.http('staysGet', { route: 'me/stays/{fixtureId}', methods: ['GET'], authLeve
 app.http('stayPut', { route: 'me/stays/{fixtureId}', methods: ['PUT'], authLevel: 'anonymous', handler: stayPut })
 app.http('stayDelete', { route: 'me/stays/{fixtureId}', methods: ['DELETE'], authLevel: 'anonymous', handler: stayDelete })
 app.http('meTeamsPut', { route: 'me/teams', methods: ['PUT'], authLevel: 'anonymous', handler: meTeamsPut })
+app.http('nextGoingGet', { route: 'me/next-going', methods: ['GET'], authLevel: 'anonymous', handler: nextGoingGet })
 app.http('goingGet', { route: 'me/going/{fixtureId}', methods: ['GET'], authLevel: 'anonymous', handler: goingGet })
 app.http('goingPut', { route: 'me/going/{fixtureId}', methods: ['PUT'], authLevel: 'anonymous', handler: goingPut })
 app.http('goingDelete', { route: 'me/going/{fixtureId}', methods: ['DELETE'], authLevel: 'anonymous', handler: goingDelete })

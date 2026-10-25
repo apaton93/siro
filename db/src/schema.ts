@@ -55,6 +55,8 @@ export const fixtureStatus = pgEnum('fixture_status', ['scheduled', 'live', 'fin
  */
 export const fanAccess = pgEnum('fan_access', ['normal', 'partial_closure', 'no_away_fans', 'behind_closed_doors'])
 export const venueType = pgEnum('venue_type', ['pub', 'restaurant', 'other'])
+/** Fan suggestions start as pending and only show once an admin approves them. */
+export const venueStatus = pgEnum('venue_status', ['pending', 'approved', 'rejected'])
 export const stayVisibility = pgEnum('stay_visibility', ['fans_only', 'public', 'private'])
 export const threadCategory = pgEnum('thread_category', [
   'general',
@@ -225,9 +227,19 @@ export const venues = pgTable(
       .references(() => cities.id),
     location: geographyPoint('location').notNull(),
     awayFriendly: boolean('away_friendly').notNull().default(false),
+    /** Short description, e.g. "Recommended meeting point for away fans". */
+    notes: text('notes'),
+    status: venueStatus('status').notNull().default('approved'),
+    suggestedBy: uuid('suggested_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+    /** Where the information came from (guides, club pages). */
+    sourceUrl: text('source_url'),
     createdAt: createdAt(),
   },
-  (t) => [index('venues_location_gix').using('gist', t.location), index('venues_city_idx').on(t.cityId)],
+  (t) => [
+    index('venues_location_gix').using('gist', t.location),
+    index('venues_city_idx').on(t.cityId),
+    index('venues_status_idx').on(t.status),
+  ],
 )
 
 // ---------- Users ----------

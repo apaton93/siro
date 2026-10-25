@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import type { AdminReference, AdminSaveResponse, ApiError, ReportedPostsResponse } from '@siro/shared'
+import type { AdminReference, AdminSaveResponse, ApiError, PendingVenuesResponse, ReportedPostsResponse } from '@siro/shared'
 import { getClientPrincipal } from '../auth'
 import { getDb } from '../db'
 import { badRequest, isUuid, json, notFound, serverError } from '../http'
@@ -8,6 +8,7 @@ import { createEntity, deleteEntity, ENTITIES, getReference, isAdmin, isEntity, 
 import { firstIssue } from '../admin/schemas'
 import { listReportedPosts, setPostHidden } from '../discussion/queries'
 import { deleteAvatar } from '../users/avatars'
+import { listPendingVenues, setVenueStatus } from '../venues/queries'
 
 const PRIVATE = { 'Cache-Control': 'no-store' }
 
@@ -104,6 +105,24 @@ export const avatarRemove = adminOnly('avatarRemove', async (req) => {
   return { status: 204 }
 })
 
+/** GET /api/manage/venues – fan suggestions waiting for approval. */
+export const pendingVenues = adminOnly('pendingVenues', async () =>
+  json<PendingVenuesResponse>(200, { venues: await listPendingVenues(getDb()) }),
+)
+
+/** PUT /api/manage/venues/{id}/status { status: approved | rejected, awayFriendly? } */
+export const venueStatus = adminOnly('venueStatus', async (req) => {
+  const id = req.params.id
+  if (!isUuid(id)) return badRequest('id must be a valid id')
+  const body = (await readJson(req)) as { status?: unknown; awayFriendly?: unknown } | undefined
+  if (body?.status !== 'approved' && body?.status !== 'rejected') return badRequest('status must be approved or rejected')
+  const awayFriendly = typeof body.awayFriendly === 'boolean' ? body.awayFriendly : undefined
+  if (!(await setVenueStatus(getDb(), id, body.status, awayFriendly))) return notFound('Venue not found')
+  return json(200, { status: body.status })
+})
+
+app.http('pendingVenues', { route: 'manage/venues', methods: ['GET'], authLevel: 'anonymous', handler: pendingVenues })
+app.http('venueStatus', { route: 'manage/venues/{id}/status', methods: ['PUT'], authLevel: 'anonymous', handler: venueStatus })
 app.http('avatarRemove', { route: 'manage/users/{id}/avatar', methods: ['DELETE'], authLevel: 'anonymous', handler: avatarRemove })
 app.http('reportedPosts', { route: 'manage/reported-posts', methods: ['GET'], authLevel: 'anonymous', handler: reportedPosts })
 app.http('postHidden', { route: 'manage/posts/{id}/hidden', methods: ['PUT'], authLevel: 'anonymous', handler: postHidden })
