@@ -63,9 +63,9 @@ describe('stays', () => {
     expect(res.status).toBe(200)
     const body = res.jsonBody as StaysResponse
     expect(body.mine).toEqual({ ...snapToGrid(hotel.lat, hotel.lng), visibility: 'fans_only' })
-    const [raw] = await t.db.execute<{ lat: number; lng: number }>(
-      sql`select ST_Y(${stays.area}::geometry) as lat, ST_X(${stays.area}::geometry) as lng from ${stays}`,
-    ).then((r) => ('rows' in r ? (r.rows as { lat: number; lng: number }[]) : (r as unknown as { lat: number; lng: number }[])))
+    const [raw] = await t.db
+      .select({ lat: sql<number>`ST_Y(${stays.area}::geometry)`.mapWith(Number), lng: sql<number>`ST_X(${stays.area}::geometry)`.mapWith(Number) })
+      .from(stays)
     expect(raw.lat).not.toBe(hotel.lat)
     expect(raw.lat).toBeCloseTo(snapToGrid(hotel.lat, hotel.lng).lat, 6)
     expect(body.stadium.name).toBe('Camp Nou')
