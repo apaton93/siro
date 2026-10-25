@@ -12,7 +12,7 @@ const PRIVATE = { 'Cache-Control': 'no-store' }
 type Handler = (request: HttpRequest) => Promise<HttpResponseInit>
 
 /**
- * Azure only lets signed-in users reach /api/admin* (staticwebapp.config.json);
+ * Azure only lets signed-in users reach /api/manage* (staticwebapp.config.json);
  * this also checks the fan's is_admin flag, and maps database rule failures to 400/409.
  */
 function adminOnly(name: string, handler: Handler) {
@@ -44,10 +44,10 @@ async function readJson(request: HttpRequest): Promise<unknown> {
   }
 }
 
-/** GET /api/admin/reference – every reference record, for the admin screens. */
+/** GET /api/manage/reference – every reference record, for the admin screens. */
 export const adminReference = adminOnly('adminReference', async () => json<AdminReference>(200, await getReference(getDb())))
 
-/** POST /api/admin/{entity} */
+/** POST /api/manage/{entity} */
 export const adminCreate = adminOnly('adminCreate', async (req) => {
   const entity = req.params.entity
   if (!isEntity(entity)) return notFound('Unknown type')
@@ -56,7 +56,7 @@ export const adminCreate = adminOnly('adminCreate', async (req) => {
   return json<AdminSaveResponse>(201, { id: await createEntity(getDb(), entity, parsed.data) })
 })
 
-/** PUT /api/admin/{entity}/{id} – replaces every field. */
+/** PUT /api/manage/{entity}/{id} – replaces every field. */
 export const adminUpdate = adminOnly('adminUpdate', async (req) => {
   const { entity, id } = req.params
   if (!isEntity(entity)) return notFound('Unknown type')
@@ -67,7 +67,7 @@ export const adminUpdate = adminOnly('adminUpdate', async (req) => {
   return json<AdminSaveResponse>(200, { id })
 })
 
-/** DELETE /api/admin/{entity}/{id} – fixtures and guide sections only. */
+/** DELETE /api/manage/{entity}/{id} – fixtures and guide sections only. */
 export const adminDelete = adminOnly('adminDelete', async (req) => {
   const { entity, id } = req.params
   if (!isEntity(entity)) return notFound('Unknown type')
@@ -77,7 +77,7 @@ export const adminDelete = adminOnly('adminDelete', async (req) => {
   return { status: 204 }
 })
 
-app.http('adminReference', { route: 'admin/reference', methods: ['GET'], authLevel: 'anonymous', handler: adminReference })
-app.http('adminCreate', { route: 'admin/{entity}', methods: ['POST'], authLevel: 'anonymous', handler: adminCreate })
-app.http('adminUpdate', { route: 'admin/{entity}/{id}', methods: ['PUT'], authLevel: 'anonymous', handler: adminUpdate })
-app.http('adminDelete', { route: 'admin/{entity}/{id}', methods: ['DELETE'], authLevel: 'anonymous', handler: adminDelete })
+app.http('adminReference', { route: 'manage/reference', methods: ['GET'], authLevel: 'anonymous', handler: adminReference })
+app.http('adminCreate', { route: 'manage/{entity}', methods: ['POST'], authLevel: 'anonymous', handler: adminCreate })
+app.http('adminUpdate', { route: 'manage/{entity}/{id}', methods: ['PUT'], authLevel: 'anonymous', handler: adminUpdate })
+app.http('adminDelete', { route: 'manage/{entity}/{id}', methods: ['DELETE'], authLevel: 'anonymous', handler: adminDelete })
