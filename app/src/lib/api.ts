@@ -3,6 +3,7 @@ import type {
   AdminReference,
   AdminSaveResponse,
   ApiError,
+  CompetitionsListResponse,
   FixtureDetail,
   FixturesListResponse,
   GoingStatus,
@@ -41,16 +42,29 @@ async function request<T>(method: string, path: string, opts: { body?: unknown; 
   return body as T
 }
 
+export interface FixtureFilters {
+  q?: string
+  /** Any of these team ids. */
+  teams?: string[]
+  /** Competition code, e.g. UCL. */
+  competition?: string
+  when?: 'upcoming' | 'results'
+}
+
 const get = <T,>(path: string, signal?: AbortSignal) => request<T>('GET', path, { signal })
 const enc = encodeURIComponent
 
 export const api = {
-  fixtures: (params: { q?: string } = {}, signal?: AbortSignal) => {
+  fixtures: (params: FixtureFilters = {}, signal?: AbortSignal) => {
     const query = new URLSearchParams()
     if (params.q) query.set('q', params.q)
+    if (params.teams?.length) query.set('teams', params.teams.join(','))
+    if (params.competition) query.set('competition', params.competition)
+    if (params.when) query.set('when', params.when)
     const qs = query.toString()
     return get<FixturesListResponse>(`/api/fixtures${qs ? `?${qs}` : ''}`, signal)
   },
+  competitions: (signal?: AbortSignal) => get<CompetitionsListResponse>('/api/competitions', signal),
   fixture: (id: string, signal?: AbortSignal) => get<FixtureDetail>(`/api/fixtures/${enc(id)}`, signal),
   teams: (q: string, signal?: AbortSignal) => get<TeamsListResponse>(`/api/teams${q ? `?q=${enc(q)}` : ''}`, signal),
 

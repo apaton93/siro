@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { AppShell } from './components/AppShell'
 import { AdminPage } from './pages/AdminPage'
+import { CompetitionPage } from './pages/CompetitionPage'
 import { FixturePage } from './pages/FixturePage'
 import { HomePage } from './pages/HomePage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -12,6 +13,7 @@ export default function App() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<HomePage />} />
+        <Route path="competitions/:code" element={<CompetitionPage />} />
         <Route path="fixtures/:id" element={<FixturePage />} />
         <Route
           path="fixtures/:id/discuss"

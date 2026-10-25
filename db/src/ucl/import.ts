@@ -56,6 +56,7 @@ export async function importUcl(db: AnyDb): Promise<ImportCounts> {
     // Competition
     let [competition] = await tx.select().from(s.competitions).where(eq(s.competitions.name, COMPETITION.name))
     competition ??= (await tx.insert(s.competitions).values(COMPETITION).returning())[0]
+    if (!competition.code) await tx.update(s.competitions).set({ code: COMPETITION.code }).where(eq(s.competitions.id, competition.id))
 
     // Cities (by name + country)
     const cityIds = {} as Record<CityKey, string>

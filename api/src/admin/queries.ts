@@ -24,7 +24,7 @@ const latOf = (col: unknown): SQL<number> => sql<number>`ST_Y(${col}::geometry)`
 
 export async function getReference(db: Db): Promise<AdminReference> {
   const [comps, cityRows, stadiumRows, teamRows, airportRows, fixtureRows, guideRows] = await Promise.all([
-    db.select({ id: competitions.id, name: competitions.name, type: competitions.type }).from(competitions).orderBy(asc(competitions.name)),
+    db.select({ id: competitions.id, name: competitions.name, code: competitions.code, type: competitions.type }).from(competitions).orderBy(asc(competitions.name)),
     db
       .select({
         id: cities.id,

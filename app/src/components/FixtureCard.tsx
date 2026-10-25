@@ -8,6 +8,7 @@ import { TeamBand } from './TeamBand'
 export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
   const { awayTeam, homeTeam, city, stadium, competition } = fixture
   const access = fanAccessInfo(fixture.fanAccess)
+  const finished = fixture.status === 'finished' && fixture.homeScore !== null && fixture.awayScore !== null
 
   return (
     <Link to={`/fixtures/${fixture.id}`} className="fixture-card">
@@ -30,7 +31,11 @@ export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
         <span>
           {stadium.name}, {city.name}
         </span>
-        {access ? (
+        {finished ? (
+          <strong>
+            FT {fixture.homeScore}–{fixture.awayScore}
+          </strong>
+        ) : access ? (
           <strong className={`access-badge access-badge--${access.severity}`}>{access.badge}</strong>
         ) : (
           <strong>{fixture.goingCount} going</strong>
