@@ -142,6 +142,21 @@ describe('adding a real fixture end to end', () => {
     expect(after).toMatchObject({ status: 'finished', homeScore: 1, awayScore: 2 })
   })
 
+  it('flags a fixture as behind closed doors, shown on the public detail', async () => {
+    const current = ((await adminReference(req('GET', {}, { as: admin }), ctx())).jsonBody as AdminReference).fixtures.find(
+      (f) => f.id === fixtureId,
+    )!
+    const { id: _id, ...fields } = current
+    const body = { ...fields, fanAccess: 'behind_closed_doors', fanAccessNote: 'UEFA sanction' }
+    expect((await adminUpdate(req('PUT', { entity: 'fixtures', id: fixtureId }, { as: admin, body }), ctx())).status).toBe(200)
+    const detail = (
+      await fixtureDetail(new HttpRequest({ method: 'GET', url: 'http://localhost/api/fixtures/x', params: { id: fixtureId } }), ctx())
+    ).jsonBody as FixtureDetail
+    expect(detail).toMatchObject({ fanAccess: 'behind_closed_doors', fanAccessNote: 'UEFA sanction' })
+    const bad = { ...fields, fanAccess: 'maybe' }
+    expect((await adminUpdate(req('PUT', { entity: 'fixtures', id: fixtureId }, { as: admin, body: bad }), ctx())).status).toBe(400)
+  })
+
   it('adds and deletes a guide section, then deletes the fixture', async () => {
     const sectionId = await createdId('guide-sections', { fixtureId, type: 'transport', title: 'Getting there', content: 'Bus 19.' })
     expect((await adminDelete(req('DELETE', { entity: 'guide-sections', id: sectionId }, { as: admin }), ctx())).status).toBe(204)

@@ -11,7 +11,8 @@
     "migrate": "drizzle-kit migrate",
     "studio": "drizzle-kit studio",
     "seed": "tsx src/seed.ts",
-    "make-admin": "tsx src/make-admin.ts"
+    "make-admin": "tsx src/make-admin.ts",
+    "import-ucl": "tsx src/import-ucl.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

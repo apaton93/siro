@@ -42,6 +42,11 @@ export const point = (lng: number, lat: number): string => `SRID=4326;POINT(${ln
 export const competitionType = pgEnum('competition_type', ['club', 'international'])
 export const teamType = pgEnum('team_type', ['club', 'national'])
 export const fixtureStatus = pgEnum('fixture_status', ['scheduled', 'live', 'finished', 'postponed'])
+/**
+ * Can fans attend? Set from UEFA sanctions ("Sanctions affecting supporter attendance").
+ * `no_away_fans` and `behind_closed_doors` disable "I'm going" – fans are advised not to travel.
+ */
+export const fanAccess = pgEnum('fan_access', ['normal', 'partial_closure', 'no_away_fans', 'behind_closed_doors'])
 export const venueType = pgEnum('venue_type', ['pub', 'restaurant', 'other'])
 export const stayVisibility = pgEnum('stay_visibility', ['fans_only', 'public', 'private'])
 export const threadCategory = pgEnum('thread_category', [
@@ -167,6 +172,8 @@ export const fixtures = pgTable(
     homeScore: integer('home_score'),
     awayScore: integer('away_score'),
     scoreNotes: text('score_notes'), // AET / penalties
+    fanAccess: fanAccess('fan_access').notNull().default('normal'),
+    fanAccessNote: text('fan_access_note'), // e.g. "UEFA sanction – stands closed"
     createdAt: createdAt(),
   },
   (t) => [

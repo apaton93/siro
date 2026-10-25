@@ -1,5 +1,5 @@
 import { attendances, fixtures, teams, userTeams, users } from '@siro/db'
-import { LIMITS, type GoingStatus, type Me, type TeamRef } from '@siro/shared'
+import { LIMITS, type FanAccess, type GoingStatus, type Me, type TeamRef } from '@siro/shared'
 import { and, asc, count, desc, eq, ilike, inArray } from 'drizzle-orm'
 import type { ClientPrincipal } from '../auth'
 import type { Db } from '../db'
@@ -93,9 +93,10 @@ export async function setMyTeams(db: Db, userId: string, selection: TeamSelectio
 
 // ---------- "I'm going" ----------
 
-export async function fixtureExists(db: Db, fixtureId: string): Promise<boolean> {
-  const [row] = await db.select({ id: fixtures.id }).from(fixtures).where(eq(fixtures.id, fixtureId))
-  return !!row
+/** The fixture's fan access, or null if there's no such fixture. */
+export async function fixtureFanAccess(db: Db, fixtureId: string): Promise<FanAccess | null> {
+  const [row] = await db.select({ fanAccess: fixtures.fanAccess }).from(fixtures).where(eq(fixtures.id, fixtureId))
+  return row?.fanAccess ?? null
 }
 
 export async function getGoing(db: Db, userId: string, fixtureId: string): Promise<GoingStatus> {

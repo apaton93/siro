@@ -93,6 +93,8 @@ export const fixtureSchema = z
     homeScore: score,
     awayScore: score,
     scoreNotes: optionalText(60),
+    fanAccess: z.enum(['normal', 'partial_closure', 'no_away_fans', 'behind_closed_doors']).default('normal'),
+    fanAccessNote: optionalText(300),
   })
   .refine((f) => f.homeTeamId !== f.awayTeamId, { message: 'Home and away teams must be different', path: ['awayTeamId'] })
   .refine((f) => (f.homeScore === null) === (f.awayScore === null), {

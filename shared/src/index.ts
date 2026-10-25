@@ -5,6 +5,12 @@
 
 export type FixtureStatus = 'scheduled' | 'live' | 'finished' | 'postponed'
 
+/** Can fans attend? From UEFA sanctions. */
+export type FanAccess = 'normal' | 'partial_closure' | 'no_away_fans' | 'behind_closed_doors'
+
+/** Travelling fans are advised not to go, and "I'm going" is disabled. */
+export const isTravelBlocked = (access: FanAccess) => access === 'no_away_fans' || access === 'behind_closed_doors'
+
 export interface TeamRef {
   id: string
   name: string
@@ -33,6 +39,8 @@ export interface FixtureSummary {
   stage: string | null
   homeScore: number | null
   awayScore: number | null
+  fanAccess: FanAccess
+  fanAccessNote: string | null
   competition: CompetitionRef
   homeTeam: TeamRef
   awayTeam: TeamRef
@@ -188,6 +196,8 @@ export interface FixtureInput {
   homeScore: number | null
   awayScore: number | null
   scoreNotes: string | null
+  fanAccess: FanAccess
+  fanAccessNote: string | null
 }
 
 export interface GuideSectionInput {

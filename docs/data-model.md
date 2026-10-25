@@ -88,6 +88,8 @@ erDiagram
         int home_score "nullable"
         int away_score "nullable"
         text score_notes "AET / pens, nullable"
+        enum fan_access "normal | partial_closure | no_away_fans | behind_closed_doors"
+        text fan_access_note "nullable"
     }
     GUIDE_SECTION {
         uuid id PK
@@ -175,6 +177,7 @@ erDiagram
 ## Implementation notes (SIRO-22)
 Source of truth is now `db/src/schema.ts`. Small additions made while implementing:
 - `fixtures.stage` (e.g. "League phase"); check that home and away teams differ.
+- `fixtures.fan_access` reflects UEFA sanctions ("Sanctions affecting supporter attendance"). `no_away_fans` and `behind_closed_doors` show a "don't travel" warning and the API refuses "I'm going"; `partial_closure` shows a caution only.
 - `guide_sections.title` and `sort_order`; check that a section belongs to a city or a fixture.
 - `users.is_admin` for the admin journey; table is `users` (`user` is reserved in Postgres).
 - `posts.hidden` for moderation.
