@@ -54,6 +54,15 @@ describe('GET /api/fixtures filters', () => {
     expect(mine.every((f) => [f.homeTeam.id, f.awayTeam.id].some((id) => id === ids.Liverpool || id === ids['Aston Villa']))).toBe(true)
   })
 
+  it('can limit to away games only', async () => {
+    const { fixtures: away } = await list(`teams=${ids.Liverpool}&side=away`)
+    expect(away.length).toBeGreaterThan(0)
+    expect(away.every((f) => f.awayTeam.id === ids.Liverpool)).toBe(true)
+    const { fixtures: awayResults } = await list(`teams=${ids.Barcelona}&side=away&when=results`)
+    expect(awayResults.map((f) => f.homeTeam.name)).toEqual(['Paris Saint-Germain', 'Galatasaray'])
+    expect((await list(`teams=${ids.Liverpool}&side=home`)).status).toBe(400)
+  })
+
   it('returns recent results, most recent first', async () => {
     const { fixtures: results } = await list(`teams=${ids.Barcelona}&when=results`)
     expect(results.map((f) => [f.homeTeam.name, f.awayTeam.name, f.homeScore, f.awayScore])).toEqual([
