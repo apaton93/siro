@@ -1,0 +1,1 @@
+ALTER TABLE "stadiums" ADD COLUMN "getting_there" text;
