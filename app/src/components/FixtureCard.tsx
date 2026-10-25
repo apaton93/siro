@@ -17,6 +17,8 @@ export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
         textColour={awayTeam.onPrimaryColour}
         photoUrl={city.photoUrl}
         photoCredit={city.photoCredit}
+        solidUntil={34}
+        clearTop={25}
       >
         <div className="fixture-card__meta">
           <span>▸ {competition.name}</span>
@@ -24,7 +26,7 @@ export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
         </div>
         <div className="fixture-card__teams">
           <span>{homeTeam.name}</span>
-          <span>v {awayTeam.name}</span>
+          <span className="fixture-card__away">v {awayTeam.name}</span>
         </div>
       </TeamBand>
       <div className="fixture-card__foot">

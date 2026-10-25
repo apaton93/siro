@@ -9,6 +9,8 @@ interface TeamBandProps {
   photoCredit?: string | null
   /** % of the band (from the bottom) kept fully solid behind the text. */
   solidUntil?: number
+  /** % of the band (from the top) left completely untinted, so more of the city shows. */
+  clearTop?: number
   watermark?: boolean
   className?: string
   children: ReactNode
@@ -24,6 +26,7 @@ export function TeamBand({
   photoUrl,
   photoCredit,
   solidUntil = 45,
+  clearTop,
   watermark = false,
   className = '',
   children,
@@ -31,7 +34,7 @@ export function TeamBand({
   return (
     <div className={`team-band ${className}`} style={{ color: textColour }}>
       {photoUrl && <img className="band-photo" src={photoUrl} alt="" loading="lazy" decoding="async" />}
-      <div className="band-fade" style={{ background: bandFade(colour, solidUntil) }} aria-hidden="true" />
+      <div className="band-fade" style={{ background: bandFade(colour, solidUntil, clearTop) }} aria-hidden="true" />
       <div className="band-stripes" style={{ backgroundImage: bandStripes(textColour) }} aria-hidden="true" />
       {watermark && (
         <div className="band-watermark" style={{ WebkitTextStroke: `1px ${rgba(textColour, 0.16)}` }} aria-hidden="true">

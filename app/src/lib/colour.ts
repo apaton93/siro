@@ -16,10 +16,19 @@ export function rgba(hex: string, alpha: number): string {
 }
 
 /**
- * Bottom-up fade: solid team colour where the text sits, easing to almost clear at the top
- * so the city photo shows. `solidUntil` is the % of height that stays fully solid.
+ * Bottom-up fade: solid team colour where the text sits, easing out so the city photo shows.
+ * `solidUntil` is the % of height (from the bottom) that stays fully solid. With `clearTop`,
+ * the top `clearTop`% has no tint at all; otherwise the top keeps a faint wash.
  */
-export function bandFade(hex: string, solidUntil = 45): string {
+export function bandFade(hex: string, solidUntil = 45, clearTop?: number): string {
+  if (clearTop !== undefined) {
+    const clearFrom = 100 - clearTop
+    const mid = solidUntil + (clearFrom - solidUntil) * 0.4
+    return `linear-gradient(to top, ${rgba(hex, 1)} 0%, ${rgba(hex, 1)} ${solidUntil}%, ${rgba(hex, 0.55)} ${mid}%, ${rgba(
+      hex,
+      0,
+    )} ${clearFrom}%, ${rgba(hex, 0)} 100%)`
+  }
   return `linear-gradient(to top, ${rgba(hex, 1)} 0%, ${rgba(hex, 1)} ${solidUntil}%, ${rgba(hex, 0.6)} ${
     solidUntil + 20
   }%, ${rgba(hex, 0.08)} 100%)`
