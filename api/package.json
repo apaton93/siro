@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@azure/functions": "^4.7.0",
+    "@azure/functions": "4.16.5",
     "@siro/db": "*",
     "@siro/shared": "*",
     "drizzle-orm": "^0.45.4",
