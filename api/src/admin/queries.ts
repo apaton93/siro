@@ -91,6 +91,8 @@ export async function getReference(db: Db): Promise<AdminReference> {
         homeScore: fixtures.homeScore,
         awayScore: fixtures.awayScore,
         scoreNotes: fixtures.scoreNotes,
+        fanAccess: fixtures.fanAccess,
+        fanAccessNote: fixtures.fanAccessNote,
       })
       .from(fixtures)
       .orderBy(asc(fixtures.kickoffUtc)),

@@ -877,3 +877,75 @@ select.input {
   border-top: 0;
   padding-top: 0;
 }
+
+/* ---------- Fan access advisory (UEFA sanctions) ---------- */
+
+.advisory {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-left: 4px solid;
+}
+
+.advisory strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.advisory p {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.advisory svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.advisory__note {
+  color: var(--muted);
+}
+
+.advisory--stop {
+  background: #fef2f2;
+  border-color: #b91c1c;
+  color: #7f1d1d;
+}
+
+.advisory--caution {
+  background: #fff7ed;
+  border-color: var(--siro-orange);
+  color: #7c2d12;
+}
+
+.access-badge {
+  padding: 2px 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.access-badge--stop {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.access-badge--caution {
+  background: var(--siro-orange);
+  color: var(--ink);
+}
+
+.fixture-card__foot .access-badge {
+  flex: none;
+  align-self: center;
+  line-height: 18px;
+}
+
+.fixture-card__foot .access-badge--stop {
+  color: #fff;
+}

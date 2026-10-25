@@ -63,10 +63,26 @@ export const CONFIGS: EntityConfig[] = [
       { key: 'homeScore', label: 'Home score', kind: 'number', optional: true },
       { key: 'awayScore', label: 'Away score', kind: 'number', optional: true },
       { key: 'scoreNotes', label: 'Score notes', kind: 'text', optional: true, help: 'e.g. AET, 4–3 on penalties' },
+      {
+        key: 'fanAccess',
+        label: 'Fan access',
+        kind: 'select',
+        options: () => [
+          { value: 'normal', label: 'Normal' },
+          { value: 'partial_closure', label: 'Partial closure (warning)' },
+          { value: 'no_away_fans', label: 'No away fans (don’t travel)' },
+          { value: 'behind_closed_doors', label: 'Behind closed doors (don’t travel)' },
+        ],
+        initial: 'normal',
+        help: 'From UEFA’s “Sanctions affecting supporter attendance” list',
+      },
+      { key: 'fanAccessNote', label: 'Fan access note', kind: 'text', optional: true, help: 'e.g. UEFA sanction for crowd disturbances' },
     ],
     describe: (f, ref) => ({
       main: fixtureLabel(f as never, ref),
-      sub: [byId(ref.competitions, f.competitionId)?.name, f.stage, f.status].filter(Boolean).join(' · '),
+      sub: [byId(ref.competitions, f.competitionId)?.name, f.stage, f.status, f.fanAccess !== 'normal' && String(f.fanAccess).replaceAll('_', ' ')]
+        .filter(Boolean)
+        .join(' · '),
     }),
   },
   {

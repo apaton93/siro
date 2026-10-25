@@ -23,6 +23,12 @@ const paths = {
   ),
   check: <path d="M5 12l5 5 9-10" />,
   external: <path d="M14 5h5v5M19 5l-8 8M10 5H5v14h14v-5" />,
+  alert: (
+    <>
+      <path d="M12 3l10 18H2z" />
+      <path d="M12 10v5M12 18v.01" />
+    </>
+  ),
 }
 
 export type IconName = keyof typeof paths

@@ -1,11 +1,11 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import { LIMITS, type GoingStatus, type Me } from '@siro/shared'
+import { isTravelBlocked, LIMITS, type ApiError, type GoingStatus, type Me } from '@siro/shared'
 import { getClientPrincipal } from '../auth'
 import { getDb } from '../db'
 import { badRequest, isUuid, json, notFound, serverError } from '../http'
 import {
   ensureUser,
-  fixtureExists,
+  fixtureFanAccess,
   getGoing,
   getMe,
   setDisplayName,
@@ -86,7 +86,12 @@ const goingHandler = (going: boolean | null) =>
   signedIn(going === null ? 'goingGet' : going ? 'goingPut' : 'goingDelete', async (req, userId) => {
     const fixtureId = req.params.fixtureId
     if (!isUuid(fixtureId)) return badRequest('fixtureId must be a valid id')
-    if (!(await fixtureExists(getDb(), fixtureId))) return notFound('Fixture not found')
+    const access = await fixtureFanAccess(getDb(), fixtureId)
+    if (!access) return notFound('Fixture not found')
+    // Un-going is always allowed; going isn't when fans can't attend.
+    if (going === true && isTravelBlocked(access)) {
+      return json<ApiError>(409, { error: "Fans can't attend this match – please don't travel" })
+    }
 
     const status =
       going === null ? await getGoing(getDb(), userId, fixtureId) : await setGoing(getDb(), userId, fixtureId, going)

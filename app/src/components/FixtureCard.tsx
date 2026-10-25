@@ -1,11 +1,13 @@
 import type { FixtureSummary } from '@siro/shared'
 import { Link } from 'react-router'
+import { fanAccessInfo } from '../lib/fanAccess'
 import { formatShortDate } from '../lib/format'
 import { TeamBand } from './TeamBand'
 
 /** Fixture card: city photo fading into the away team's colour (the travelling fans' team). */
 export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
   const { awayTeam, homeTeam, city, stadium, competition } = fixture
+  const access = fanAccessInfo(fixture.fanAccess)
 
   return (
     <Link to={`/fixtures/${fixture.id}`} className="fixture-card">
@@ -28,7 +30,11 @@ export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
         <span>
           {stadium.name}, {city.name}
         </span>
-        <strong>{fixture.goingCount} going</strong>
+        {access ? (
+          <strong className={`access-badge access-badge--${access.severity}`}>{access.badge}</strong>
+        ) : (
+          <strong>{fixture.goingCount} going</strong>
+        )}
       </div>
     </Link>
   )

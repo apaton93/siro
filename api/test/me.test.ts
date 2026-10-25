@@ -172,6 +172,32 @@ describe("I'm going", () => {
     const res = await goingPut(req('PUT', `me/going/${fixtureId}`, { params: { fixtureId } }), ctx())
     expect(res.status).toBe(401)
   })
+  it.each(['behind_closed_doors', 'no_away_fans'] as const)('refuses going when %s, but still allows undo', async (access) => {
+    // microsoftFan is still marked going from earlier.
+    await t.db.update(fixtures).set({ fanAccess: access }).where(eq(fixtures.id, fixtureId))
+    try {
+      const res = await going(goingPut, 'PUT')
+      expect(res.status).toBe(409)
+      expect((res.jsonBody as { error: string }).error).toMatch(/don't travel/)
+      expect(((await going(goingGet, 'GET')).jsonBody as GoingStatus).going).toBe(false)
+      expect((await going(goingDelete, 'DELETE', microsoftFan)).status).toBe(200)
+      await going(goingPut, 'PUT', microsoftFan) // 409, so stays un-going
+      expect(((await going(goingGet, 'GET', microsoftFan)).jsonBody as GoingStatus).going).toBe(false)
+    } finally {
+      await t.db.update(fixtures).set({ fanAccess: 'normal' }).where(eq(fixtures.id, fixtureId))
+      await going(goingPut, 'PUT', microsoftFan)
+    }
+  })
+
+  it('still allows going with a partial closure', async () => {
+    await t.db.update(fixtures).set({ fanAccess: 'partial_closure' }).where(eq(fixtures.id, fixtureId))
+    try {
+      expect((await going(goingPut, 'PUT')).status).toBe(200)
+      await going(goingDelete, 'DELETE')
+    } finally {
+      await t.db.update(fixtures).set({ fanAccess: 'normal' }).where(eq(fixtures.id, fixtureId))
+    }
+  })
 })
 
 describe('GET /api/teams', () => {

@@ -1,4 +1,4 @@
-import type { FixtureDetail } from '@siro/shared'
+import { isTravelBlocked, type FanAccess, type FixtureDetail } from '@siro/shared'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { Icon } from '../components/Icon'
@@ -7,6 +7,7 @@ import { TeamBand } from '../components/TeamBand'
 import { api, ApiRequestError, useApi } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { rgba } from '../lib/colour'
+import { fanAccessInfo } from '../lib/fanAccess'
 import { daysUntil, formatKickoff, formatKm, formatShortDate } from '../lib/format'
 
 export function FixturePage() {
@@ -163,7 +164,8 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           </div>
         </dl>
 
-        <GoingButton fixtureId={fixture.id} onCount={setGoingCount} />
+        <FanAccessBanner access={fixture.fanAccess} note={fixture.fanAccessNote} />
+        <GoingButton fixtureId={fixture.id} fanAccess={fixture.fanAccess} onCount={setGoingCount} />
 
         <nav className="tabs" aria-label="Fixture sections">
           <a href="#overview" className="active" aria-current="true">
@@ -265,7 +267,25 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
 }
 
 /** "I'm going" toggle. Signed-out fans are sent to sign in and brought back here. */
-function GoingButton({ fixtureId, onCount }: { fixtureId: string; onCount: (n: number) => void }) {
+/** Warning when UEFA has restricted who can attend. */
+function FanAccessBanner({ access, note }: { access: FanAccess; note: string | null }) {
+  const info = fanAccessInfo(access)
+  if (!info) return null
+  return (
+    <div className={`advisory advisory--${info.severity}`} role="alert">
+      <Icon name="alert" size={20} />
+      <div>
+        <strong>{info.title}</strong>
+        <p>{info.body}</p>
+        {note && <p className="advisory__note">{note}</p>}
+      </div>
+    </div>
+  )
+}
+
+function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: (n: number) => void }) {
+  const { fixtureId, onCount } = props
+  const blocked = isTravelBlocked(props.fanAccess)
   const { auth } = useAuth()
   const location = useLocation()
   const signedIn = auth.status === 'signed-in'
@@ -286,6 +306,18 @@ function GoingButton({ fixtureId, onCount }: { fixtureId: string; onCount: (n: n
       .catch(() => {})
     return () => controller.abort()
   }, [signedIn, fixtureId, onCount])
+
+  // Fans can't attend: no "I'm going" (anyone already marked going can still undo it).
+  if (blocked && !going) {
+    return (
+      <div className="cta">
+        <button type="button" className="btn btn-primary btn-block" disabled>
+          <Icon name="check" size={18} /> I'm going
+        </button>
+        <p className="cta__note">Unavailable – fans can’t attend this match.</p>
+      </div>
+    )
+  }
 
   if (!signedIn) {
     const returnTo = encodeURIComponent(location.pathname)
