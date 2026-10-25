@@ -1427,3 +1427,53 @@ label.btn {
 .collapsible .collapsible {
   margin-left: 0;
 }
+
+/* ---------- Where fans are staying ---------- */
+
+.subhead {
+  margin: 16px 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.stay-map {
+  height: 260px;
+  border: 1px solid var(--line);
+  z-index: 0;
+}
+
+.stay-map--pick {
+  height: 320px;
+  cursor: crosshair;
+}
+
+.stay-count.leaflet-tooltip {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.stay-count.leaflet-tooltip::before {
+  display: none;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--siro-orange);
+}
+
+.stay-map--far .stay-count {
+  display: none;
+}

@@ -3,6 +3,8 @@ import type {
   AdminReference,
   AdminSaveResponse,
   ApiError,
+  SetStayRequest,
+  StaysResponse,
   CreatePostRequest,
   CreateThreadRequest,
   ReportedPostsResponse,
@@ -89,6 +91,9 @@ export const api = {
     return body as Me
   },
   removeAvatar: () => request<Me>('DELETE', '/api/me/avatar'),
+  stays: (fixtureId: string, signal?: AbortSignal) => get<StaysResponse>(`/api/me/stays/${enc(fixtureId)}`, signal),
+  setStay: (fixtureId: string, body: SetStayRequest) => request<StaysResponse>('PUT', `/api/me/stays/${enc(fixtureId)}`, { body }),
+  removeStay: (fixtureId: string) => request<StaysResponse>('DELETE', `/api/me/stays/${enc(fixtureId)}`),
   going: (fixtureId: string, signal?: AbortSignal) => get<GoingStatus>(`/api/me/going/${enc(fixtureId)}`, signal),
   setGoing: (fixtureId: string, going: boolean) =>
     request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),

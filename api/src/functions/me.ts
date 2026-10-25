@@ -1,8 +1,19 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import { AVATAR, isTravelBlocked, LIMITS, type ApiError, type GoingStatus, type Me } from '@siro/shared'
+import {
+  AVATAR,
+  isTravelBlocked,
+  LIMITS,
+  STAY_MAX_KM,
+  type ApiError,
+  type GoingStatus,
+  type Me,
+  type SetStayRequest,
+  type StaysResponse,
+} from '@siro/shared'
 import { getDb } from '../db'
 import { badRequest, isUuid, json, notFound } from '../http'
 import { readJson, signedIn } from '../session'
+import { attendanceId, deleteStay, setStay, staysFor } from '../stays/queries'
 import { deleteAvatar, processAvatar, saveAvatar } from '../users/avatars'
 import {
   fixtureFanAccess,
@@ -71,6 +82,45 @@ export const avatarDelete = signedIn('avatarDelete', async (_req, userId) => {
   return json<Me>(200, await getMe(getDb(), userId))
 })
 
+// ---------- Where I'm staying (only for fans going) ----------
+
+const NOT_GOING = { error: 'Mark yourself as going to see and share where fans are staying' }
+
+const stayHandler = (name: string, fn: (req: HttpRequest, userId: string, fixtureId: string, attendance: string) => Promise<HttpResponseInit>) =>
+  signedIn(name, async (req, userId) => {
+    const fixtureId = req.params.fixtureId
+    if (!isUuid(fixtureId)) return badRequest('fixtureId must be a valid id')
+    const attendance = await attendanceId(getDb(), userId, fixtureId)
+    if (!attendance) return json<ApiError>(403, NOT_GOING)
+    return fn(req, userId, fixtureId, attendance)
+  })
+
+/** GET /api/me/stays/{fixtureId} – my stay and the shaded squares for everyone going. */
+export const staysGet = stayHandler('staysGet', async (_req, _userId, fixtureId, attendance) => {
+  const result = await staysFor(getDb(), fixtureId, attendance)
+  return result ? json<StaysResponse>(200, result) : notFound('Fixture not found')
+})
+
+/** PUT /api/me/stays/{fixtureId} { lat, lng, visibility } – rounded to a ~500m square. */
+export const stayPut = stayHandler('stayPut', async (req, _userId, fixtureId, attendance) => {
+  const body = (await readJson(req)) as Partial<SetStayRequest> | undefined
+  const { lat, lng, visibility } = body ?? {}
+  if (typeof lat !== 'number' || typeof lng !== 'number' || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return badRequest('Tap the map to choose where you’re staying')
+  }
+  if (visibility !== 'fans_only' && visibility !== 'private') return badRequest('visibility must be fans_only or private')
+  if ((await setStay(getDb(), attendance, fixtureId, { lat, lng, visibility })) === 'too-far') {
+    return badRequest(`That’s more than ${STAY_MAX_KM} km from the stadium`)
+  }
+  return json<StaysResponse>(200, (await staysFor(getDb(), fixtureId, attendance))!)
+})
+
+/** DELETE /api/me/stays/{fixtureId} */
+export const stayDelete = stayHandler('stayDelete', async (_req, _userId, fixtureId, attendance) => {
+  await deleteStay(getDb(), attendance)
+  return json<StaysResponse>(200, (await staysFor(getDb(), fixtureId, attendance))!)
+})
+
 // ---------- "I'm going" ----------
 
 const goingHandler = (going: boolean | null) =>
@@ -100,6 +150,9 @@ app.http('meGet', { route: 'me', methods: ['GET'], authLevel: 'anonymous', handl
 app.http('mePatch', { route: 'me', methods: ['PATCH'], authLevel: 'anonymous', handler: mePatch })
 app.http('avatarPut', { route: 'me/avatar', methods: ['PUT'], authLevel: 'anonymous', handler: avatarPut })
 app.http('avatarDelete', { route: 'me/avatar', methods: ['DELETE'], authLevel: 'anonymous', handler: avatarDelete })
+app.http('staysGet', { route: 'me/stays/{fixtureId}', methods: ['GET'], authLevel: 'anonymous', handler: staysGet })
+app.http('stayPut', { route: 'me/stays/{fixtureId}', methods: ['PUT'], authLevel: 'anonymous', handler: stayPut })
+app.http('stayDelete', { route: 'me/stays/{fixtureId}', methods: ['DELETE'], authLevel: 'anonymous', handler: stayDelete })
 app.http('meTeamsPut', { route: 'me/teams', methods: ['PUT'], authLevel: 'anonymous', handler: meTeamsPut })
 app.http('goingGet', { route: 'me/going/{fixtureId}', methods: ['GET'], authLevel: 'anonymous', handler: goingGet })
 app.http('goingPut', { route: 'me/going/{fixtureId}', methods: ['PUT'], authLevel: 'anonymous', handler: goingPut })

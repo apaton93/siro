@@ -329,3 +329,63 @@ export interface ReportedPost {
 export interface ReportedPostsResponse {
   posts: ReportedPost[]
 }
+
+// ---------- Where fans are staying (ADR-0006) ----------
+
+/** Stays are rounded to squares this size before saving – exact locations are never stored. */
+export const STAY_CELL_M = 500
+/** Stays further than this from the stadium are rejected. */
+export const STAY_MAX_KM = 100
+
+export type StayVisibility = 'fans_only' | 'private'
+
+export interface MyStay {
+  /** Centre of the ~500m square. */
+  lat: number
+  lng: number
+  visibility: StayVisibility
+}
+
+export interface SetStayRequest {
+  lat: number
+  lng: number
+  visibility: StayVisibility
+}
+
+export interface StayCell {
+  lat: number
+  lng: number
+  count: number
+}
+
+/** GET /api/me/stays/{fixtureId} – only for fans going to the match. */
+export interface StaysResponse {
+  mine: MyStay | null
+  /** Squares with at least one (non-private) stay. Never names. */
+  cells: StayCell[]
+  total: number
+  stadium: { lat: number; lng: number; name: string }
+}
+
+const M_PER_DEG_LAT = 111_320
+
+/** Snap a point to the centre of its grid square (same maths on server and client). */
+export function snapToGrid(lat: number, lng: number, sizeM = STAY_CELL_M): { lat: number; lng: number } {
+  const latStep = sizeM / M_PER_DEG_LAT
+  const snappedLat = (Math.floor(lat / latStep) + 0.5) * latStep
+  const lngStep = sizeM / (M_PER_DEG_LAT * Math.cos((snappedLat * Math.PI) / 180))
+  const snappedLng = (Math.floor(lng / lngStep) + 0.5) * lngStep
+  return { lat: round6(snappedLat), lng: round6(snappedLng) }
+}
+
+/** South-west and north-east corners of the square centred on a snapped point. */
+export function cellBounds(lat: number, lng: number, sizeM = STAY_CELL_M): [[number, number], [number, number]] {
+  const dLat = sizeM / M_PER_DEG_LAT / 2
+  const dLng = sizeM / (M_PER_DEG_LAT * Math.cos((lat * Math.PI) / 180)) / 2
+  return [
+    [lat - dLat, lng - dLng],
+    [lat + dLat, lng + dLng],
+  ]
+}
+
+const round6 = (n: number) => Math.round(n * 1e6) / 1e6
