@@ -3,6 +3,12 @@ import type {
   AdminReference,
   AdminSaveResponse,
   ApiError,
+  CreatePostRequest,
+  CreateThreadRequest,
+  ReportedPostsResponse,
+  ThreadCategory,
+  ThreadDetail,
+  ThreadsListResponse,
   CompetitionsListResponse,
   FixtureDetail,
   FixturesListResponse,
@@ -86,6 +92,18 @@ export const api = {
       ? request<AdminSaveResponse>('PUT', `/api/manage/${entity}/${enc(id)}`, { body })
       : request<AdminSaveResponse>('POST', `/api/manage/${entity}`, { body }),
   adminDelete: (entity: AdminEntity, id: string) => request<null>('DELETE', `/api/manage/${entity}/${enc(id)}`),
+  reportedPosts: (signal?: AbortSignal) => get<ReportedPostsResponse>('/api/manage/reported-posts', signal),
+  setPostHidden: (postId: string, hidden: boolean) =>
+    request<{ hidden: boolean }>('PUT', `/api/manage/posts/${enc(postId)}/hidden`, { body: { hidden } }),
+
+  // Discussion – reads are public; writes need sign-in (/api/discuss*)
+  threads: (fixtureId: string, category: ThreadCategory | null, signal?: AbortSignal) =>
+    get<ThreadsListResponse>(`/api/fixtures/${enc(fixtureId)}/threads${category ? `?category=${category}` : ''}`, signal),
+  thread: (id: string, signal?: AbortSignal) => get<ThreadDetail>(`/api/threads/${enc(id)}`, signal),
+  createThread: (body: CreateThreadRequest) => request<AdminSaveResponse>('POST', '/api/discuss/threads', { body }),
+  createPost: (threadId: string, body: CreatePostRequest) =>
+    request<AdminSaveResponse>('POST', `/api/discuss/threads/${enc(threadId)}/posts`, { body }),
+  reportPost: (postId: string) => request<{ hidden: boolean }>('POST', `/api/discuss/posts/${enc(postId)}/report`),
 }
 
 export type Loadable<T> =

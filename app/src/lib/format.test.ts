@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysUntil, formatKickoff, formatKm, formatShortDate } from './format'
+import { daysUntil, formatKickoff, formatKm, formatRelative, formatShortDate } from './format'
 
 describe('formatKickoff', () => {
   it('shows local time and UK time when they differ', () => {
@@ -39,5 +39,16 @@ describe('formatKm', () => {
   it('uses one decimal under 10 km and whole km above', () => {
     expect(formatKm(9.8)).toBe('9.8 km')
     expect(formatKm(78.5)).toBe('79 km')
+  })
+})
+
+describe('formatRelative', () => {
+  const now = Date.parse('2026-10-25T12:00:00Z')
+  it('describes recent times', () => {
+    expect(formatRelative('2026-10-25T11:59:30Z', now)).toBe('just now')
+    expect(formatRelative('2026-10-25T11:55:00Z', now)).toBe('5m ago')
+    expect(formatRelative('2026-10-25T09:00:00Z', now)).toBe('3h ago')
+    expect(formatRelative('2026-10-23T12:00:00Z', now)).toBe('2d ago')
+    expect(formatRelative('2026-09-01T12:00:00Z', now)).toBe('1 Sept')
   })
 })

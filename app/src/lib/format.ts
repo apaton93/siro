@@ -52,3 +52,13 @@ export function daysUntil(iso: string, now: Date = new Date()): number {
 export function formatKm(km: number): string {
   return km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`
 }
+
+/** "just now", "5m ago", "3h ago", "2d ago", then a short date. */
+export function formatRelative(iso: string, now = Date.now()): string {
+  const secs = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000))
+  if (secs < 60) return 'just now'
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  if (secs < 7 * 86400) return `${Math.floor(secs / 86400)}d ago`
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(new Date(iso))
+}

@@ -2,10 +2,12 @@ import { Route, Routes } from 'react-router'
 import { AppShell } from './components/AppShell'
 import { AdminPage } from './pages/AdminPage'
 import { CompetitionPage } from './pages/CompetitionPage'
+import { DiscussPage } from './pages/DiscussPage'
 import { FixturePage } from './pages/FixturePage'
 import { HomePage } from './pages/HomePage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SignInPage } from './pages/SignInPage'
+import { ThreadPage } from './pages/ThreadPage'
 import { ComingSoonPage, NotFoundPage, StatusPage } from './pages/SimplePages'
 
 export default function App() {
@@ -15,10 +17,8 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="competitions/:code" element={<CompetitionPage />} />
         <Route path="fixtures/:id" element={<FixturePage />} />
-        <Route
-          path="fixtures/:id/discuss"
-          element={<ComingSoonPage title="Discussion">Fixture threads for flights, hotels, pubs and meetups are on the way.</ComingSoonPage>}
-        />
+        <Route path="fixtures/:id/discuss" element={<DiscussPage />} />
+        <Route path="fixtures/:id/discuss/:threadId" element={<ThreadPage />} />
         <Route
           path="map"
           element={<ComingSoonPage title="Fan map">See where fans are staying, recommended pubs and live check-ins.</ComingSoonPage>}

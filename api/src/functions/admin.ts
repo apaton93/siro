@@ -1,11 +1,12 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import type { AdminReference, AdminSaveResponse, ApiError } from '@siro/shared'
+import type { AdminReference, AdminSaveResponse, ApiError, ReportedPostsResponse } from '@siro/shared'
 import { getClientPrincipal } from '../auth'
 import { getDb } from '../db'
 import { badRequest, isUuid, json, notFound, serverError } from '../http'
 import { ensureUser } from '../users/queries'
 import { createEntity, deleteEntity, ENTITIES, getReference, isAdmin, isEntity, pgCode, updateEntity } from '../admin/queries'
 import { firstIssue } from '../admin/schemas'
+import { listReportedPosts, setPostHidden } from '../discussion/queries'
 
 const PRIVATE = { 'Cache-Control': 'no-store' }
 
@@ -77,6 +78,25 @@ export const adminDelete = adminOnly('adminDelete', async (req) => {
   return { status: 204 }
 })
 
+// ---------- Moderation ----------
+
+/** GET /api/manage/reported-posts – posts with reports, or hidden. */
+export const reportedPosts = adminOnly('reportedPosts', async () =>
+  json<ReportedPostsResponse>(200, { posts: await listReportedPosts(getDb()) }),
+)
+
+/** PUT /api/manage/posts/{id}/hidden { hidden: boolean } – restoring clears the post's reports. */
+export const postHidden = adminOnly('postHidden', async (req) => {
+  const id = req.params.id
+  if (!isUuid(id)) return badRequest('id must be a valid id')
+  const body = (await readJson(req)) as { hidden?: unknown } | undefined
+  if (typeof body?.hidden !== 'boolean') return badRequest('hidden must be true or false')
+  if (!(await setPostHidden(getDb(), id, body.hidden))) return notFound('Post not found')
+  return json(200, { hidden: body.hidden })
+})
+
+app.http('reportedPosts', { route: 'manage/reported-posts', methods: ['GET'], authLevel: 'anonymous', handler: reportedPosts })
+app.http('postHidden', { route: 'manage/posts/{id}/hidden', methods: ['PUT'], authLevel: 'anonymous', handler: postHidden })
 app.http('adminReference', { route: 'manage/reference', methods: ['GET'], authLevel: 'anonymous', handler: adminReference })
 app.http('adminCreate', { route: 'manage/{entity}', methods: ['POST'], authLevel: 'anonymous', handler: adminCreate })
 app.http('adminUpdate', { route: 'manage/{entity}/{id}', methods: ['PUT'], authLevel: 'anonymous', handler: adminUpdate })

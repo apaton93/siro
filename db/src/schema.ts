@@ -238,7 +238,11 @@ export const users = pgTable('users', {
   homeAirportId: uuid('home_airport_id').references(() => airports.id),
   isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: createdAt(),
-}, (t) => [uniqueIndex('users_auth_uq').on(t.authProvider, t.authUserId)])
+}, (t) => [
+  uniqueIndex('users_auth_uq').on(t.authProvider, t.authUserId),
+  // Display names are unique ignoring case ("Arab Andy" = "arab andy").
+  uniqueIndex('users_display_name_uq').on(sql`lower(${t.displayName})`),
+])
 
 export const userTeams = pgTable(
   'user_teams',
@@ -322,6 +326,21 @@ export const posts = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('posts_thread_idx').on(t.threadId, t.createdAt)],
+)
+
+/** One report per fan per post; posts with enough reports are hidden automatically. */
+export const postReports = pgTable(
+  'post_reports',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.userId] })],
 )
 
 export const recommendations = pgTable(

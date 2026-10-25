@@ -89,6 +89,23 @@ describe('PATCH /api/me', () => {
     const res = await mePatch(req('PATCH', 'me', { fan: githubFan, body: { displayName } }), ctx())
     expect(res.status).toBe(400)
   })
+  it('refuses a name another fan has, ignoring case', async () => {
+    const res = await mePatch(req('PATCH', 'me', { fan: microsoftFan, body: { displayName: 'arab ANDY' } }), ctx())
+    expect(res.status).toBe(409)
+    expect((res.jsonBody as { error: string }).error).toMatch(/taken/)
+  })
+
+  it('lets a fan re-save their own name with different capitals', async () => {
+    const res = await mePatch(req('PATCH', 'me', { fan: githubFan, body: { displayName: 'ARAB andy' } }), ctx())
+    expect(res.status).toBe(200)
+    await mePatch(req('PATCH', 'me', { fan: githubFan, body: { displayName: 'Arab Andy' } }), ctx())
+  })
+
+  it('numbers a new fan whose GitHub name is already taken', async () => {
+    const copycat: Fan = { provider: 'github', userId: 'gh-user-2', userDetails: 'Arab Andy' }
+    const me = (await meGet(req('GET', 'me', { fan: copycat }), ctx())).jsonBody as Me
+    expect(me.displayName).toMatch(/^Arab Andy \d{4}$/)
+  })
 })
 
 describe('PUT /api/me/teams', () => {
