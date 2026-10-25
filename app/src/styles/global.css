@@ -1096,3 +1096,26 @@ select.input {
   background: rgba(0, 0, 0, 0.38);
   color: rgba(255, 255, 255, 0.92);
 }
+
+/* Teams left, date right – one compact row at the bottom of the photo. */
+.fixture-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fixture-card__date {
+  flex: none;
+  padding-bottom: 2px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.fixture-card__city {
+  font-weight: 700;
+  color: var(--ink);
+}
