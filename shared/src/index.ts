@@ -89,6 +89,7 @@ export interface FixtureDetail extends FixtureSummary {
     name: string
     capacity: number | null
     awayEntranceNotes: string | null
+    gettingThere: string | null
     lat: number
     lng: number
   }
@@ -180,6 +181,7 @@ export interface StadiumInput {
   lat: number
   lng: number
   awayEntranceNotes: string | null
+  gettingThere: string | null
 }
 
 export interface TeamInput {

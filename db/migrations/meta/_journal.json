@@ -64,6 +64,13 @@
       "when": 1792930606040,
       "tag": "0008_user_avatars",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792934580554,
+      "tag": "0009_stadium_getting_there",
+      "breakpoints": true
     }
   ]
 }

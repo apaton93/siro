@@ -115,6 +115,8 @@ export const stadiums = pgTable(
     capacity: integer('capacity'),
     location: geographyPoint('location').notNull(),
     awayEntranceNotes: text('away_entrance_notes'),
+    /** Public transport to the ground (shown on its fixtures). */
+    gettingThere: text('getting_there'),
     createdAt: createdAt(),
   },
   (t) => [index('stadiums_location_gix').using('gist', t.location), index('stadiums_city_idx').on(t.cityId)],

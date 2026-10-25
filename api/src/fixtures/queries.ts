@@ -184,6 +184,7 @@ export async function getFixture(db: Db, id: string): Promise<FixtureDetail | nu
         name: stadiums.name,
         capacity: stadiums.capacity,
         awayEntranceNotes: stadiums.awayEntranceNotes,
+        gettingThere: stadiums.gettingThere,
         lat: sql<number>`ST_Y(${stadiums.location}::geometry)`,
         lng: sql<number>`ST_X(${stadiums.location}::geometry)`,
       },

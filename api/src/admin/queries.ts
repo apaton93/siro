@@ -49,6 +49,7 @@ export async function getReference(db: Db): Promise<AdminReference> {
         lat: latOf(stadiums.location),
         lng: lngOf(stadiums.location),
         awayEntranceNotes: stadiums.awayEntranceNotes,
+        gettingThere: stadiums.gettingThere,
       })
       .from(stadiums)
       .orderBy(asc(stadiums.name)),

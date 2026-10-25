@@ -1334,3 +1334,96 @@ label.btn {
 .fixture-hero {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
+
+/* ---------- Collapsible sections ---------- */
+
+.collapsible-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.collapsible {
+  border-top: 1px solid var(--line);
+}
+
+.collapsible-group > .collapsible:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.collapsible > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 10px 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible > summary:focus-visible {
+  outline: 2px solid var(--siro-orange);
+  outline-offset: 2px;
+}
+
+.collapsible__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.collapsible__title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.collapsible__chevron {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s;
+}
+
+.collapsible[open] > summary .collapsible__chevron {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.collapsible__body {
+  padding: 0 0 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible__chevron {
+    transition: none;
+  }
+}
+
+/* Whole-section collapsibles (Travel, Areas): a big heading, no rule above (sections have their own). */
+.collapsible--section {
+  border-top: 0;
+}
+
+.collapsible--section > summary {
+  padding: 0;
+}
+
+.collapsible--section > summary .collapsible__title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.collapsible--section > .collapsible__body {
+  padding-top: 12px;
+}
+
+.collapsible .collapsible {
+  margin-left: 0;
+}

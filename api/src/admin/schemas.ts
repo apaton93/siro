@@ -63,6 +63,7 @@ export const stadiumSchema = z.object({
   lat,
   lng,
   awayEntranceNotes: optionalText(2000),
+  gettingThere: optionalText(2000),
 })
 
 export const teamSchema = z.object({

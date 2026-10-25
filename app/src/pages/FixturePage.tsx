@@ -1,6 +1,7 @@
 import { isTravelBlocked, type FanAccess, type FixtureDetail } from '@siro/shared'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
+import { Collapsible } from '../components/Collapsible'
 import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { TeamBand } from '../components/TeamBand'
@@ -85,7 +86,11 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
     }
   }
 
-  const cityGuide = fixture.guideSections
+  // City guide sections by type (see GUIDE_TYPES); fixture-specific notes show under the stadium.
+  const citySections = fixture.guideSections.filter((s) => s.scope === 'city')
+  const guide = (type: string) => citySections.filter((s) => s.type === type)
+  const fixtureNotes = fixture.guideSections.filter((s) => s.scope === 'fixture')
+  const otherGuide = citySections.filter((s) => !['to-centre', 'areas', 'things-to-do', 'tips'].includes(s.type))
 
   return (
     <>
@@ -172,7 +177,8 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
             Overview
           </a>
           <a href="#travel">Travel</a>
-          <a href="#guide">Guide</a>
+          <a href="#areas">Areas</a>
+          <a href="#guide">City</a>
           <Link to={`/fixtures/${fixture.id}/discuss`}>Discuss</Link>
           <Link to="/map">Map</Link>
         </nav>
@@ -184,7 +190,25 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
               {stadium.name}
             </h2>
             {stadium.capacity && <p className="prose">Capacity {stadium.capacity.toLocaleString('en-GB')}</p>}
-            {stadium.awayEntranceNotes && <p className="prose">{stadium.awayEntranceNotes}</p>}
+            {stadium.awayEntranceNotes && (
+              <p className="prose">
+                <strong>Away fans:</strong> {stadium.awayEntranceNotes}
+              </p>
+            )}
+            {(guide('tips').length > 0 || fixtureNotes.length > 0) && (
+              <div className="collapsible-group">
+                {fixtureNotes.map((s) => (
+                  <Collapsible key={s.id} title={s.title} kicker="This fixture">
+                    <p className="prose">{s.content}</p>
+                  </Collapsible>
+                ))}
+                {guide('tips').map((s) => (
+                  <Collapsible key={s.id} title={s.title}>
+                    <p className="prose">{s.content}</p>
+                  </Collapsible>
+                ))}
+              </div>
+            )}
             <a
               className="btn btn-sm"
               style={{ alignSelf: 'flex-start' }}
@@ -196,41 +220,67 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
             </a>
           </section>
 
-          <section id="travel" aria-labelledby="travel-heading">
-            <span className="kicker">Travel</span>
-            <h2 id="travel-heading" className="display">
-              Getting there
-            </h2>
-            {fixture.airports.length > 0 ? (
-              <ul className="rows">
-                {fixture.airports.map((a) => (
-                  <li key={a.id}>
-                    <div className="row-main">
-                      <strong>
-                        {a.iata} · {a.name}
-                      </strong>
-                      <span>to the stadium</span>
-                    </div>
-                    <span className="row-value">{formatKm(a.distanceKm)}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="prose">No airport details yet.</p>
-            )}
-            <div className="grid-2">
-              <a className="btn btn-dark" href="https://www.skyscanner.net/" target="_blank" rel="noreferrer">
-                Flights <Icon name="external" size={16} />
-              </a>
+          <section id="travel">
+            <Collapsible variant="section" kicker="Travel" title="Getting there">
+              <div className="collapsible-group">
+                <Collapsible title="Flights">
+                  {fixture.airports.length > 0 ? (
+                    <ul className="rows">
+                      {fixture.airports.map((a) => (
+                        <li key={a.id}>
+                          <div className="row-main">
+                            <strong>
+                              {a.iata} · {a.name}
+                            </strong>
+                            <span>to the stadium</span>
+                          </div>
+                          <span className="row-value">{formatKm(a.distanceKm)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="prose">No airport details yet.</p>
+                  )}
+                  <a className="btn btn-dark btn-block" href="https://www.skyscanner.net/" target="_blank" rel="noreferrer" style={{ marginTop: 12 }}>
+                    Search flights <Icon name="external" size={16} />
+                  </a>
+                </Collapsible>
+                <Collapsible title="To the city centre">
+                  {guide('to-centre').length > 0 ? (
+                    guide('to-centre').map((s) => (
+                      <p key={s.id} className="prose">
+                        {s.content}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="prose">No details yet.</p>
+                  )}
+                </Collapsible>
+                <Collapsible title="To the stadium">
+                  <p className="prose">{stadium.gettingThere ?? 'No details yet.'}</p>
+                </Collapsible>
+              </div>
+            </Collapsible>
+          </section>
+
+          <section id="areas">
+            <Collapsible variant="section" kicker="Areas" title="Where to stay">
+              {guide('areas').map((s) => (
+                <p key={s.id} className="prose">
+                  {s.content}
+                </p>
+              ))}
+              {guide('areas').length === 0 && <p className="prose">No details yet.</p>}
               <a
-                className="btn"
+                className="btn btn-block"
                 href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city.name)}`}
                 target="_blank"
                 rel="noreferrer"
+                style={{ marginTop: 12 }}
               >
-                Hotels <Icon name="external" size={16} />
+                Search hotels <Icon name="external" size={16} />
               </a>
-            </div>
+            </Collapsible>
           </section>
 
           <section id="guide" aria-labelledby="guide-heading">
@@ -252,13 +302,21 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
                 {city.language}
               </div>
             </div>
-            {cityGuide.map((s) => (
-              <article key={s.id} className="guide-item">
-                <span className="kicker">{s.scope === 'fixture' ? 'This fixture' : s.type}</span>
+            {guide('things-to-do').map((s) => (
+              <div key={s.id} className="guide-item">
                 <h3>{s.title}</h3>
                 <p className="prose">{s.content}</p>
-              </article>
+              </div>
             ))}
+            {otherGuide.length > 0 && (
+              <div className="collapsible-group">
+                {otherGuide.map((s) => (
+                  <Collapsible key={s.id} title={s.title}>
+                    <p className="prose">{s.content}</p>
+                  </Collapsible>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
