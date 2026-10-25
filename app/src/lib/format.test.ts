@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysUntil, formatKickoff, formatKm, formatRelative, formatShortDate } from './format'
+import { daysUntil, formatKickoff, formatKm, formatRelative, formatShortDate, kickoffParts } from './format'
 
 describe('formatKickoff', () => {
   it('shows local time and UK time when they differ', () => {
@@ -50,5 +50,12 @@ describe('formatRelative', () => {
     expect(formatRelative('2026-10-25T09:00:00Z', now)).toBe('3h ago')
     expect(formatRelative('2026-10-23T12:00:00Z', now)).toBe('2d ago')
     expect(formatRelative('2026-09-01T12:00:00Z', now)).toBe('1 Sept')
+  })
+})
+
+describe('kickoffParts', () => {
+  it('splits date, local time and UK time', () => {
+    expect(kickoffParts('2026-11-04T17:45:00Z', 'Europe/Istanbul')).toEqual({ date: 'Wed 4 Nov 2026', local: '20:45 GMT+3', uk: '17:45 UK' })
+    expect(kickoffParts('2026-11-04T20:00:00Z', 'Europe/London').uk).toBeNull()
   })
 })

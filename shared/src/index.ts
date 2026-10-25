@@ -122,6 +122,8 @@ export interface Me {
   displayName: string
   authProvider: AuthProvider
   isAdmin: boolean
+  /** Profile photo, or null to show initials. */
+  avatarUrl: string | null
   teams: MyTeam[]
 }
 
@@ -259,7 +261,12 @@ export const DISCUSSION_LIMITS = {
 export interface Author {
   id: string
   displayName: string
+  /** Profile photo, or null to show initials. */
+  avatarUrl: string | null
 }
+
+/** Profile photos: square JPEGs this size, made in the browser before upload. */
+export const AVATAR = { size: 256, maxBytes: 200_000 }
 
 export interface ThreadSummary {
   id: string

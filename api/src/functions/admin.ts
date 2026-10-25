@@ -7,6 +7,7 @@ import { ensureUser } from '../users/queries'
 import { createEntity, deleteEntity, ENTITIES, getReference, isAdmin, isEntity, pgCode, updateEntity } from '../admin/queries'
 import { firstIssue } from '../admin/schemas'
 import { listReportedPosts, setPostHidden } from '../discussion/queries'
+import { deleteAvatar } from '../users/avatars'
 
 const PRIVATE = { 'Cache-Control': 'no-store' }
 
@@ -95,6 +96,15 @@ export const postHidden = adminOnly('postHidden', async (req) => {
   return json(200, { hidden: body.hidden })
 })
 
+/** DELETE /api/manage/users/{id}/avatar – remove an unsuitable profile photo. */
+export const avatarRemove = adminOnly('avatarRemove', async (req) => {
+  const id = req.params.id
+  if (!isUuid(id)) return badRequest('id must be a valid id')
+  if (!(await deleteAvatar(getDb(), id))) return notFound('No photo to remove')
+  return { status: 204 }
+})
+
+app.http('avatarRemove', { route: 'manage/users/{id}/avatar', methods: ['DELETE'], authLevel: 'anonymous', handler: avatarRemove })
 app.http('reportedPosts', { route: 'manage/reported-posts', methods: ['GET'], authLevel: 'anonymous', handler: reportedPosts })
 app.http('postHidden', { route: 'manage/posts/{id}/hidden', methods: ['PUT'], authLevel: 'anonymous', handler: postHidden })
 app.http('adminReference', { route: 'manage/reference', methods: ['GET'], authLevel: 'anonymous', handler: adminReference })

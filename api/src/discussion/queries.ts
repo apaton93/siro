@@ -1,6 +1,7 @@
 import { fixtures, postReports, posts, teams, threads, users } from '@siro/db'
 import {
   DISCUSSION_LIMITS,
+  type Author,
   type PostInfo,
   type ReportedPost,
   type ThreadCategory,
@@ -10,11 +11,24 @@ import {
 import { and, asc, count, desc, eq, gt, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { Db } from '../db'
+import { avatarUrl } from '../users/avatars'
 
 const MAX_THREADS = 100
 const MAX_POSTS = 500
 
 const toIso = (value: Date | string) => new Date(value).toISOString()
+
+/** Author columns, with their photo's version (users is never aliased in these queries). */
+const authorCols = {
+  id: users.id,
+  displayName: users.displayName,
+  avatarAt: sql<string | null>`(select a.updated_at from user_avatars a where a.user_id = users.id)`,
+}
+const toAuthor = (a: { id: string; displayName: string; avatarAt: string | Date | null }): Author => ({
+  id: a.id,
+  displayName: a.displayName,
+  avatarUrl: avatarUrl(a.id, a.avatarAt),
+})
 
 // Thread stats from its posts. Raw table names: Drizzle leaves columns unqualified in
 // single-table selects, which would make "id" ambiguous inside a subquery.
@@ -27,7 +41,7 @@ const threadCols = {
   category: threads.category,
   title: threads.title,
   createdAt: threads.createdAt,
-  author: { id: users.id, displayName: users.displayName },
+  author: authorCols,
   postCount,
   lastPostAt,
 }
@@ -36,10 +50,12 @@ type ThreadRow = {
   createdAt: Date | string
   lastPostAt: Date | string | null
   postCount: number
-} & Omit<ThreadSummary, 'createdAt' | 'lastPostAt' | 'postCount'>
+  author: { id: string; displayName: string; avatarAt: string | Date | null }
+} & Omit<ThreadSummary, 'createdAt' | 'lastPostAt' | 'postCount' | 'author'>
 
 const toSummary = (r: ThreadRow): ThreadSummary => ({
   ...r,
+  author: toAuthor(r.author),
   createdAt: toIso(r.createdAt),
   lastPostAt: toIso(r.lastPostAt ?? r.createdAt),
   postCount: Number(r.postCount),
@@ -84,7 +100,7 @@ export async function getThread(db: Db, threadId: string, viewerId: string | nul
       body: posts.body,
       hidden: posts.hidden,
       createdAt: posts.createdAt,
-      author: { id: users.id, displayName: users.displayName },
+      author: authorCols,
       reportedByMe,
     })
     .from(posts)
@@ -95,7 +111,7 @@ export async function getThread(db: Db, threadId: string, viewerId: string | nul
 
   const postsOut: PostInfo[] = postRows.map((p) => ({
     id: p.id,
-    author: p.author,
+    author: toAuthor(p.author),
     body: p.hidden ? null : p.body,
     hidden: p.hidden,
     createdAt: toIso(p.createdAt),
@@ -180,7 +196,7 @@ export async function listReportedPosts(db: Db): Promise<ReportedPost[]> {
       hidden: posts.hidden,
       reportedCount: posts.reportedCount,
       createdAt: posts.createdAt,
-      author: { id: users.id, displayName: users.displayName },
+      author: authorCols,
       thread: { id: threads.id, title: threads.title, fixtureId: threads.fixtureId },
     })
     .from(posts)
@@ -189,7 +205,7 @@ export async function listReportedPosts(db: Db): Promise<ReportedPost[]> {
     .where(or(gt(posts.reportedCount, 0), eq(posts.hidden, true)))
     .orderBy(desc(posts.hidden), desc(posts.reportedCount), desc(posts.createdAt))
     .limit(200)
-  return rows.map((r) => ({ ...r, createdAt: toIso(r.createdAt) }))
+  return rows.map((r) => ({ ...r, author: toAuthor(r.author), createdAt: toIso(r.createdAt) }))
 }
 
 /**

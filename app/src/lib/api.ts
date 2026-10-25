@@ -81,6 +81,14 @@ export const api = {
   me: (signal?: AbortSignal) => get<Me>('/api/me', signal),
   updateMe: (body: UpdateMeRequest) => request<Me>('PATCH', '/api/me', { body }),
   setMyTeams: (body: SetMyTeamsRequest) => request<Me>('PUT', '/api/me/teams', { body }),
+  /** Upload a square JPEG made by makeAvatar(). */
+  uploadAvatar: async (image: Blob) => {
+    const res = await fetch('/api/me/avatar', { method: 'PUT', headers: { 'Content-Type': 'image/jpeg', Accept: 'application/json' }, body: image })
+    const body = (await res.json().catch(() => null)) as Me | ApiError | null
+    if (!res.ok) throw new ApiRequestError((body as ApiError | null)?.error ?? `Upload failed (HTTP ${res.status})`, res.status)
+    return body as Me
+  },
+  removeAvatar: () => request<Me>('DELETE', '/api/me/avatar'),
   going: (fixtureId: string, signal?: AbortSignal) => get<GoingStatus>(`/api/me/going/${enc(fixtureId)}`, signal),
   setGoing: (fixtureId: string, going: boolean) =>
     request<GoingStatus>(going ? 'PUT' : 'DELETE', `/api/me/going/${enc(fixtureId)}`),
@@ -92,6 +100,7 @@ export const api = {
       ? request<AdminSaveResponse>('PUT', `/api/manage/${entity}/${enc(id)}`, { body })
       : request<AdminSaveResponse>('POST', `/api/manage/${entity}`, { body }),
   adminDelete: (entity: AdminEntity, id: string) => request<null>('DELETE', `/api/manage/${entity}/${enc(id)}`),
+  adminRemoveAvatar: (userId: string) => request<null>('DELETE', `/api/manage/users/${enc(userId)}/avatar`),
   reportedPosts: (signal?: AbortSignal) => get<ReportedPostsResponse>('/api/manage/reported-posts', signal),
   setPostHidden: (postId: string, hidden: boolean) =>
     request<{ hidden: boolean }>('PUT', `/api/manage/posts/${enc(postId)}/hidden`, { body: { hidden } }),

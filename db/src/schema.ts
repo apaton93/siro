@@ -34,6 +34,13 @@ export const geographyPoint = customType<{ data: string; driverData: string }>({
   },
 })
 
+/** Raw bytes (PostgreSQL bytea) – used for small profile photos. */
+export const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return 'bytea'
+  },
+})
+
 /** Build an EWKT point. Note the order: longitude first, then latitude. */
 export const point = (lng: number, lat: number): string => `SRID=4326;POINT(${lng} ${lat})`
 
@@ -243,6 +250,18 @@ export const users = pgTable('users', {
   // Display names are unique ignoring case ("Arab Andy" = "arab andy").
   uniqueIndex('users_display_name_uq').on(sql`lower(${t.displayName})`),
 ])
+
+/**
+ * A fan's profile photo: a 256px square JPEG, re-encoded by the API (which strips EXIF/GPS).
+ * Kept out of `users` so user queries stay light.
+ */
+export const userAvatars = pgTable('user_avatars', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  image: bytea('image').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
 
 export const userTeams = pgTable(
   'user_teams',

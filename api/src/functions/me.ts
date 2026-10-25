@@ -1,8 +1,9 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import { isTravelBlocked, LIMITS, type ApiError, type GoingStatus, type Me } from '@siro/shared'
+import { AVATAR, isTravelBlocked, LIMITS, type ApiError, type GoingStatus, type Me } from '@siro/shared'
 import { getDb } from '../db'
 import { badRequest, isUuid, json, notFound } from '../http'
 import { readJson, signedIn } from '../session'
+import { deleteAvatar, processAvatar, saveAvatar } from '../users/avatars'
 import {
   fixtureFanAccess,
   getGoing,
@@ -52,6 +53,24 @@ export const meTeamsPut = signedIn('meTeamsPut', async (req, userId) => {
   return json<Me>(200, await getMe(getDb(), userId))
 })
 
+// ---------- Profile photo ----------
+
+/** PUT /api/me/avatar – body: a 256×256 JPEG (made in the browser). */
+export const avatarPut = signedIn('avatarPut', async (req, userId) => {
+  const declared = Number(req.headers.get('content-length') ?? 0)
+  if (declared > AVATAR.maxBytes) return badRequest('That image is too big')
+  const result = processAvatar(Buffer.from(await req.arrayBuffer()))
+  if ('error' in result) return badRequest(result.error)
+  await saveAvatar(getDb(), userId, result.jpeg)
+  return json<Me>(200, await getMe(getDb(), userId))
+})
+
+/** DELETE /api/me/avatar – back to initials. */
+export const avatarDelete = signedIn('avatarDelete', async (_req, userId) => {
+  await deleteAvatar(getDb(), userId)
+  return json<Me>(200, await getMe(getDb(), userId))
+})
+
 // ---------- "I'm going" ----------
 
 const goingHandler = (going: boolean | null) =>
@@ -79,6 +98,8 @@ export const goingDelete = goingHandler(false)
 
 app.http('meGet', { route: 'me', methods: ['GET'], authLevel: 'anonymous', handler: meGet })
 app.http('mePatch', { route: 'me', methods: ['PATCH'], authLevel: 'anonymous', handler: mePatch })
+app.http('avatarPut', { route: 'me/avatar', methods: ['PUT'], authLevel: 'anonymous', handler: avatarPut })
+app.http('avatarDelete', { route: 'me/avatar', methods: ['DELETE'], authLevel: 'anonymous', handler: avatarDelete })
 app.http('meTeamsPut', { route: 'me/teams', methods: ['PUT'], authLevel: 'anonymous', handler: meTeamsPut })
 app.http('goingGet', { route: 'me/going/{fixtureId}', methods: ['GET'], authLevel: 'anonymous', handler: goingGet })
 app.http('goingPut', { route: 'me/going/{fixtureId}', methods: ['PUT'], authLevel: 'anonymous', handler: goingPut })

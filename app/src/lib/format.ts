@@ -42,6 +42,13 @@ export function formatKickoff(iso: string, timeZone: string): string {
   return local === uk ? `${date} · ${local} ${zone}` : `${date} · ${local} ${zone} (${uk} UK)`
 }
 
+/** Kickoff split for stacked display: "Wed 4 Nov 2026", "20:45 GMT+3", "17:45 UK" (null when the same as local). */
+export function kickoffParts(iso: string, timeZone: string): { date: string; local: string; uk: string | null } {
+  const local = time(iso, timeZone)
+  const uk = time(iso, UK_TZ)
+  return { date: dateLabel(iso, timeZone, true), local: `${local} ${zoneName(iso, timeZone)}`, uk: local === uk ? null : `${uk} UK` }
+}
+
 /** Whole days from now until kickoff (0 on matchday or after). */
 export function daysUntil(iso: string, now: Date = new Date()): number {
   const ms = new Date(iso).getTime() - now.getTime()

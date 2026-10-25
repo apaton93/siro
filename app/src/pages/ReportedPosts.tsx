@@ -1,6 +1,7 @@
 import type { ReportedPost } from '@siro/shared'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { Avatar } from '../components/Avatar'
 import { StateMessage } from '../components/StateMessage'
 import { api, useApi } from '../lib/api'
 import { formatRelative } from '../lib/format'
@@ -47,6 +48,19 @@ function ReportedRow({ post }: { post: ReportedPost }) {
   const [hidden, setHidden] = useState(post.hidden)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [photo, setPhoto] = useState(post.author.avatarUrl)
+
+  const removePhoto = async () => {
+    setBusy(true)
+    try {
+      await api.adminRemoveAvatar(post.author.id)
+      setPhoto(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not remove photo')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const toggle = async () => {
     setBusy(true)
@@ -64,6 +78,7 @@ function ReportedRow({ post }: { post: ReportedPost }) {
     <li className="post post--report">
       <div className="post__main">
         <div className="post__meta">
+          <Avatar name={post.author.displayName} url={photo} size="sm" />
           <strong>{post.author.displayName}</strong>
           <time dateTime={post.createdAt}>{formatRelative(post.createdAt)}</time>
           <span className={`access-badge access-badge--${hidden ? 'stop' : 'caution'}`}>
@@ -75,6 +90,11 @@ function ReportedRow({ post }: { post: ReportedPost }) {
           <Link to={`/fixtures/${post.thread.fixtureId}/discuss/${post.thread.id}`} className="link-btn">
             In “{post.thread.title}”
           </Link>
+          {photo && (
+            <button type="button" className="btn btn-sm" onClick={removePhoto} disabled={busy}>
+              Remove photo
+            </button>
+          )}
           <button type="button" className={`btn btn-sm ${hidden ? '' : 'btn-danger'}`} onClick={toggle} disabled={busy}>
             {hidden ? 'Restore' : 'Hide'}
           </button>
