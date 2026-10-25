@@ -1,11 +1,12 @@
 import type { AdminReference } from '@siro/shared'
-import { useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { TopBar } from '../components/AppShell'
 import { StateMessage } from '../components/StateMessage'
 import { api, useApi } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { utcToZonedInput, zonedTimeToUtc } from '../lib/zoned'
+import { CommonsPicker } from './CommonsPicker'
 import { CONFIGS, type EntityConfig, type Field } from './admin-config'
 import { SignInButtons } from './SignInPage'
 
@@ -248,14 +249,27 @@ function EditForm(props: { config: EntityConfig; ref_: AdminReference; row: Row 
       </h1>
 
       {config.fields.map((f) => (
-        <FieldInput
-          key={f.key}
-          field={f}
-          ref_={ref_}
-          value={values[f.key]}
-          onChange={(v) => set(f.key, v)}
-          extraHelp={f.kind === 'kickoff' ? (tz ? `Time in ${tz}` : 'Pick a stadium first') : undefined}
-        />
+        <Fragment key={f.key}>
+          <FieldInput
+            field={f}
+            ref_={ref_}
+            value={values[f.key]}
+            onChange={(v) => set(f.key, v)}
+            extraHelp={f.kind === 'kickoff' ? (tz ? `Time in ${tz}` : 'Pick a stadium first') : undefined}
+          />
+          {config.entity === 'cities' && f.key === 'photoUrl' && (
+            <>
+              {values.photoUrl && <img className="picker__preview" src={values.photoUrl} alt="Current city photo" />}
+              <CommonsPicker
+                defaultQuery={values.name}
+                onPick={(url, credit) => {
+                  set('photoUrl', url)
+                  set('photoCredit', credit)
+                }}
+              />
+            </>
+          )}
+        </Fragment>
       ))}
 
       <p className="cta__note" role="alert" aria-live="polite">

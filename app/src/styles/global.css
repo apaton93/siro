@@ -999,3 +999,65 @@ select.input {
 .comp-hero .icon-btn {
   margin-bottom: 18px;
 }
+
+/* ---------- Admin: Wikimedia Commons photo picker ---------- */
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+}
+
+.picker__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.picker__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 2px solid transparent;
+  background: var(--white);
+  text-align: left;
+  cursor: pointer;
+}
+
+.picker__item:hover,
+.picker__item:focus-visible {
+  border-color: var(--siro-orange);
+}
+
+.picker__item img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+}
+
+.picker__item span {
+  padding: 0 6px 6px;
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker__preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.comp-hero {
+  position: relative;
+}

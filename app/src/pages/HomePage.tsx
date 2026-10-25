@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon'
 import { StateMessage } from '../components/StateMessage'
 import { api, useApi, useDebounced } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { COMPETITION_CARDS, type CompetitionCardInfo } from '../lib/competitions'
+import { COMPETITION_CARDS, compBandStyle, type CompetitionCardInfo } from '../lib/competitions'
 import { SignInButtons } from './SignInPage'
 
 type Tab = 'my-teams' | 'competitions'
@@ -174,9 +174,10 @@ function CompetitionCard({ card, upcoming }: { card: CompetitionCardInfo; upcomi
   const live = upcoming !== null && upcoming > 0
   const body = (
     <>
-      <div className="comp-card__band" style={{ background: card.colour, color: card.textColour }}>
+      <div className="comp-card__band" style={compBandStyle(card)}>
         <span className="comp-card__code">{card.code}</span>
         <span className="comp-card__name">{card.name}</span>
+        {card.photo && <small className="band-credit">Photo: {card.photo.credit}</small>}
       </div>
       <div className="fixture-card__foot">
         <span>{card.tagline}</span>
