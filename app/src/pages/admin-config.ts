@@ -159,9 +159,10 @@ export const CONFIGS: EntityConfig[] = [
     deletable: false,
     fields: [
       { key: 'name', label: 'Name', kind: 'text' },
+      { key: 'code', label: 'Code', kind: 'text', optional: true, help: 'UCL, UEL or UECL links it to the home page cards' },
       { key: 'type', label: 'Type', kind: 'select', options: fixed('club', 'international'), initial: 'club' },
     ],
-    describe: (c) => ({ main: String(c.name), sub: String(c.type) }),
+    describe: (c) => ({ main: String(c.name), sub: [c.code, c.type].filter(Boolean).join(' · ') }),
   },
   {
     entity: 'guide-sections',

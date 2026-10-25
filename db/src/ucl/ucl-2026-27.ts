@@ -15,7 +15,7 @@
  * with a text colour chosen for contrast.
  */
 
-export const COMPETITION = { name: 'UEFA Champions League', type: 'club' as const }
+export const COMPETITION = { name: 'UEFA Champions League', code: 'UCL', type: 'club' as const }
 export const STAGE = 'League phase'
 /** Fixtures in this window belong to this season (used to match existing rows). */
 export const SEASON = { from: '2026-07-01T00:00:00Z', to: '2027-07-01T00:00:00Z' }

@@ -73,6 +73,8 @@ const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull(
 export const competitions = pgTable('competitions', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
+  /** Short code used in URLs and for the home page cards, e.g. UCL, UEL, UECL. */
+  code: text('code').unique(),
   type: competitionType('type').notNull(),
   createdAt: createdAt(),
 })

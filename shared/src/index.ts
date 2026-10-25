@@ -30,7 +30,21 @@ export interface CityPhoto {
 export interface CompetitionRef {
   id: string
   name: string
+  /** e.g. UCL – used in URLs (/competitions/ucl). */
+  code: string | null
 }
+
+/** GET /api/competitions */
+export interface CompetitionInfo extends CompetitionRef {
+  upcomingCount: number
+}
+
+export interface CompetitionsListResponse {
+  competitions: CompetitionInfo[]
+}
+
+/** Max teams in one ?teams= filter (matches the most a fan can pick). */
+export const MAX_TEAM_FILTER = 5
 
 export interface FixtureSummary {
   id: string
@@ -141,6 +155,7 @@ export type AdminEntity = 'competitions' | 'cities' | 'stadiums' | 'teams' | 'ai
 
 export interface CompetitionInput {
   name: string
+  code: string | null
   type: 'club' | 'international'
 }
 

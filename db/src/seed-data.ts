@@ -19,7 +19,7 @@ export async function seed(db: AnyDb): Promise<void> {
 
   const [uel] = await db
     .insert(s.competitions)
-    .values({ name: 'UEFA Europa League', type: 'club' })
+    .values({ name: 'UEFA Europa League', code: 'UEL', type: 'club' })
     .returning()
 
   const [barcelona, dundee] = await db

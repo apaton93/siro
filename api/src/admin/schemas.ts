@@ -37,6 +37,10 @@ const score = z.number().int().min(0).max(99).nullable().optional().transform((v
 
 export const competitionSchema = z.object({
   name,
+  code: z
+    .union([z.string().trim().toUpperCase().regex(/^[A-Z]{2,6}$/, 'must be 2–6 letters, e.g. UCL'), z.literal(''), z.null()])
+    .optional()
+    .transform((v) => v || null),
   type: z.enum(['club', 'international']),
 })
 
