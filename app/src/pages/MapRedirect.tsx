@@ -4,51 +4,52 @@ import { TopBar } from '../components/AppShell'
 import { StateMessage } from '../components/StateMessage'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { SignInButtons } from './SignInPage'
 
-/**
- * /map (bottom nav) – opens the map for the fan's next fixture: one they're going to,
- * else their teams' next game, else the next game overall.
- */
+/** /map (bottom nav) – opens the map for the next fixture the fan is going to. */
 export function MapRedirect() {
   const { auth } = useAuth()
   const navigate = useNavigate()
-  const [failed, setFailed] = useState<'none' | 'error' | null>(null)
+  const [result, setResult] = useState<'none' | 'error' | null>(null)
 
   useEffect(() => {
-    if (auth.status === 'loading') return
+    if (auth.status !== 'signed-in') return
     const ctrl = new AbortController()
-    const pick = async () => {
-      const s = ctrl.signal
-      if (auth.status === 'signed-in') {
-        const { fixtureId } = await api.nextGoing(s)
-        if (fixtureId) return fixtureId
-        const teams = auth.me.teams.map((t) => t.id)
-        if (teams.length) {
-          const mine = await api.fixtures({ teams }, s)
-          if (mine.fixtures[0]) return mine.fixtures[0].id
-        }
-      }
-      return (await api.fixtures({}, s)).fixtures[0]?.id ?? null
-    }
-    pick()
-      .then((id) => (id ? navigate(`/fixtures/${id}/map`, { replace: true }) : setFailed('none')))
-      .catch(() => !ctrl.signal.aborted && setFailed('error'))
+    api
+      .nextGoing(ctrl.signal)
+      .then(({ fixtureId }) => (fixtureId ? navigate(`/fixtures/${fixtureId}/map`, { replace: true }) : setResult('none')))
+      .catch(() => !ctrl.signal.aborted && setResult('error'))
     return () => ctrl.abort()
   }, [auth, navigate])
+
+  const browse = (
+    <Link to="/" className="btn btn-sm">
+      Find a fixture
+    </Link>
+  )
 
   return (
     <>
       <TopBar />
       <main className="page">
-        {failed === null && <div className="skeleton fixture-map" aria-label="Loading map" />}
-        {failed === 'none' && (
-          <StateMessage title="No upcoming fixtures">
-            The map opens for your next game once fixtures are announced.
+        {(auth.status === 'loading' || (auth.status === 'signed-in' && result === null)) && (
+          <div className="skeleton fixture-map" aria-label="Loading map" />
+        )}
+        {auth.status === 'signed-out' && (
+          <>
+            <StateMessage title="Your away day map">Sign in and mark yourself as going to a game to see its map here.</StateMessage>
+            <SignInButtons returnTo="/map" />
+          </>
+        )}
+        {auth.status === 'error' && <StateMessage title="Couldn't check your account">{auth.error.message}</StateMessage>}
+        {result === 'none' && (
+          <StateMessage title="No upcoming games" action={browse}>
+            You’re not attending any upcoming games. Mark yourself as going on a fixture and its map will show here.
           </StateMessage>
         )}
-        {failed === 'error' && (
-          <StateMessage title="Couldn't open the map" action={<Link to="/" className="btn btn-sm">Back to fixtures</Link>}>
-            Something went wrong finding your next fixture.
+        {result === 'error' && (
+          <StateMessage title="Couldn't open the map" action={browse}>
+            Something went wrong finding your next game.
           </StateMessage>
         )}
       </main>
