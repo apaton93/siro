@@ -1,6 +1,6 @@
 import { attendances, fixtures, teams, userAvatars, userTeams, users } from '@siro/db'
 import { LIMITS, type FanAccess, type GoingStatus, type Me, type TeamRef } from '@siro/shared'
-import { and, asc, count, desc, eq, ilike, inArray } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gt, ilike, inArray } from 'drizzle-orm'
 import type { ClientPrincipal } from '../auth'
 import type { Db } from '../db'
 import { avatarUrl } from './avatars'
@@ -158,6 +158,18 @@ export async function setGoing(db: Db, userId: string, fixtureId: string, going:
     await db.delete(attendances).where(and(eq(attendances.userId, userId), eq(attendances.fixtureId, fixtureId)))
   }
   return getGoing(db, userId, fixtureId)
+}
+
+/** The soonest fixture the fan is going to that hasn't finished (kicked off under 3 hours ago). */
+export async function nextGoing(db: Db, userId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ id: fixtures.id })
+    .from(attendances)
+    .innerJoin(fixtures, eq(attendances.fixtureId, fixtures.id))
+    .where(and(eq(attendances.userId, userId), gt(fixtures.kickoffUtc, new Date(Date.now() - 3 * 3600_000))))
+    .orderBy(asc(fixtures.kickoffUtc))
+    .limit(1)
+  return row?.id ?? null
 }
 
 // ---------- Team search (public) ----------

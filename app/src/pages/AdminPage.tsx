@@ -7,6 +7,7 @@ import { api, useApi } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { utcToZonedInput, zonedTimeToUtc } from '../lib/zoned'
 import { CommonsPicker } from './CommonsPicker'
+import { PendingVenues } from './PendingVenues'
 import { ReportedPosts } from './ReportedPosts'
 import { CONFIGS, type EntityConfig, type Field } from './admin-config'
 import { SignInButtons } from './SignInPage'
@@ -44,6 +45,7 @@ export function AdminPage() {
 function Admin() {
   const [params] = useSearchParams()
   const showReports = params.get('type') === 'reports'
+  const showVenues = params.get('type') === 'venues'
   const config = CONFIGS.find((c) => c.entity === params.get('type')) ?? CONFIGS[0]
   const { state, reload } = useApi('admin-reference', (signal) => api.adminReference(signal))
   const [editing, setEditing] = useState<{ entity: string; id: string | null } | null>(null)
@@ -58,8 +60,8 @@ function Admin() {
           <Link
             key={c.entity}
             to={`?type=${c.entity}`}
-            className={!showReports && c.entity === config.entity ? 'active' : ''}
-            aria-current={!showReports && c.entity === config.entity ? 'page' : undefined}
+            className={!showReports && !showVenues && c.entity === config.entity ? 'active' : ''}
+            aria-current={!showReports && !showVenues && c.entity === config.entity ? 'page' : undefined}
             onClick={() => {
               setEditing(null)
               setNotice('')
@@ -71,10 +73,15 @@ function Admin() {
         <Link to="?type=reports" className={showReports ? 'active' : ''} aria-current={showReports ? 'page' : undefined}>
           Reports
         </Link>
+        <Link to="?type=venues" className={showVenues ? 'active' : ''} aria-current={showVenues ? 'page' : undefined}>
+          Suggestions
+        </Link>
       </nav>
 
       {showReports ? (
         <ReportedPosts />
+      ) : showVenues ? (
+        <PendingVenues />
       ) : (
         <>
 

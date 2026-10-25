@@ -181,7 +181,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           <a href="#areas">Areas</a>
           <a href="#guide">City</a>
           <Link to={`/fixtures/${fixture.id}/discuss`}>Discuss</Link>
-          <Link to="/map">Map</Link>
+          <Link to={`/fixtures/${fixture.id}/map`}>Map</Link>
         </nav>
 
         <div className="sections">

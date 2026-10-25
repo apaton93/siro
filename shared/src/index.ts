@@ -136,6 +136,10 @@ export interface SetMyTeamsRequest {
   teams: { teamId: string; isPrimary: boolean }[]
 }
 
+export interface NextGoingResponse {
+  fixtureId: string | null
+}
+
 export interface GoingStatus {
   going: boolean
   goingCount: number
@@ -389,3 +393,62 @@ export function cellBounds(lat: number, lng: number, sizeM = STAY_CELL_M): [[num
 }
 
 const round6 = (n: number) => Math.round(n * 1e6) / 1e6
+
+// ---------- Map & venues ----------
+
+export type VenueType = 'pub' | 'restaurant' | 'other'
+export const VENUE_LIMITS = { nameMax: 80, notesMax: 300, tipMax: 280, maxPendingPerFan: 5, maxKm: 30 }
+
+export interface VenueInfo {
+  id: string
+  name: string
+  type: VenueType
+  awayFriendly: boolean
+  notes: string | null
+  lat: number
+  lng: number
+  /** From the fixture's stadium. */
+  distanceKm: number
+  tipCount: number
+}
+
+export interface VenuesResponse {
+  venues: VenueInfo[]
+}
+
+export interface VenueTip {
+  id: string
+  author: Author
+  text: string
+  createdAt: string
+}
+
+export interface VenueDetail {
+  venue: Omit<VenueInfo, 'distanceKm'> & { sourceUrl: string | null }
+  tips: VenueTip[]
+}
+
+export interface SuggestVenueRequest {
+  fixtureId: string
+  name: string
+  type: VenueType
+  notes: string | null
+  lat: number
+  lng: number
+}
+
+export interface PendingVenue {
+  id: string
+  name: string
+  type: VenueType
+  notes: string | null
+  lat: number
+  lng: number
+  city: string
+  suggestedBy: Author | null
+  createdAt: string
+}
+
+export interface PendingVenuesResponse {
+  venues: PendingVenue[]
+}
