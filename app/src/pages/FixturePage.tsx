@@ -1,9 +1,10 @@
 import { isTravelBlocked, type FanAccess, type FixtureDetail } from '@siro/shared'
-import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Collapsible } from '../components/Collapsible'
 import { FansStaying } from '../components/FansStaying'
 import { Icon } from '../components/Icon'
+import { useSnackbar } from '../components/Snackbar'
 import { StateMessage } from '../components/StateMessage'
 import { TeamBand } from '../components/TeamBand'
 import { api, ApiRequestError, useApi } from '../lib/api'
@@ -66,7 +67,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
   const kickoff = kickoffParts(fixture.kickoffUtc, city.timezone)
   const [showSlimBar, sentinelRef] = useScrolledPast()
   const [goingCount, setGoingCount] = useState(fixture.goingCount)
-  const [shareNote, setShareNote] = useState('')
+  const snack = useSnackbar()
 
   useEffect(() => {
     document.title = `${homeTeam.name} v ${awayTeam.name} – Siro`
@@ -80,10 +81,12 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         await navigator.share({ title, url })
       } else {
         await navigator.clipboard.writeText(url)
-        setShareNote('Link copied')
+        snack({ message: 'Link copied' })
       }
-    } catch {
-      // User cancelled the share sheet: nothing to do.
+    } catch (err) {
+      // Cancelling the share sheet is not an error.
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      snack({ message: 'Couldn’t share the link. Copy it from the address bar instead.' })
     }
   }
 
@@ -149,9 +152,6 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
               <span className="fixture-hero__countdown">{countdown(fixture.kickoffUtc)}</span>
             </time>
           </div>
-          <span className="visually-hidden" aria-live="polite">
-            {shareNote}
-          </span>
         </TeamBand>
         <div ref={sentinelRef} aria-hidden="true" />
 
@@ -174,16 +174,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         <FanAccessBanner access={fixture.fanAccess} note={fixture.fanAccessNote} />
         <GoingButton fixtureId={fixture.id} fanAccess={fixture.fanAccess} onCount={setGoingCount} />
 
-        <nav className="tabs" aria-label="Fixture sections">
-          <a href="#overview" className="active" aria-current="true">
-            Overview
-          </a>
-          <a href="#travel">Travel</a>
-          <a href="#areas">Areas</a>
-          <a href="#guide">City</a>
-          <Link to={`/fixtures/${fixture.id}/discuss`}>Discuss</Link>
-          <Link to={`/fixtures/${fixture.id}/map`}>Map</Link>
-        </nav>
+        <SectionTabs fixtureId={fixture.id} />
 
         <div className="sections">
           <section id="overview" aria-labelledby="stadium-heading">
@@ -273,7 +264,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
                 </p>
               ))}
               {guide('areas').length === 0 && <p className="prose">No details yet.</p>}
-              <h3 className="subhead">Where fans are staying</h3>
+              <h3 id="stays" className="subhead">Where fans are staying</h3>
               <FansStaying fixtureId={fixture.id} refreshKey={goingCount} />
               <a
                 className="btn btn-block"
@@ -328,7 +319,6 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
   )
 }
 
-/** "I'm going" toggle. Signed-out fans are sent to sign in and brought back here. */
 /** Warning when UEFA has restricted who can attend. */
 function FanAccessBanner({ access, note }: { access: FanAccess; note: string | null }) {
   const info = fanAccessInfo(access)
@@ -345,15 +335,20 @@ function FanAccessBanner({ access, note }: { access: FanAccess; note: string | n
   )
 }
 
-function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: (n: number) => void }) {
+/** "I'm going" toggle. Signed-out fans are sent to sign in and brought back here. */
+function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: Dispatch<SetStateAction<number>> }) {
   const { fixtureId, onCount } = props
   const blocked = isTravelBlocked(props.fanAccess)
   const { auth } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+  const snack = useSnackbar()
   const signedIn = auth.status === 'signed-in'
   const [going, setGoing] = useState<boolean | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState('')
+  const busy = useRef(false)
+  const intentHandled = useRef(false)
+  // Set when a signed-out fan tapped "I'm going" and has come back from signing in.
+  const wantsGoing = new URLSearchParams(location.search).get('intent') === 'going'
 
   // Load whether this fan is already going (private, so not part of the cached fixture data).
   useEffect(() => {
@@ -369,6 +364,44 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
     return () => controller.abort()
   }, [signedIn, fixtureId, onCount])
 
+  /** Optimistic: the button and count change straight away, then roll back if the save fails. */
+  const save = async (next: boolean, { quiet = false } = {}) => {
+    if (busy.current) return
+    busy.current = true
+    setGoing(next)
+    onCount((c) => Math.max(0, c + (next ? 1 : -1)))
+    try {
+      const status = await api.setGoing(fixtureId, next)
+      setGoing(status.going)
+      onCount(status.goingCount)
+      if (!quiet) {
+        snack({
+          message: status.going ? 'You’re on the list. See you there.' : 'Removed from the list.',
+          action: { label: 'Undo', onClick: () => void save(!status.going, { quiet: true }) },
+        })
+      }
+    } catch {
+      setGoing(!next)
+      onCount((c) => Math.max(0, c + (next ? -1 : 1)))
+      snack({
+        message: 'Couldn’t update. Check your signal and try again.',
+        action: { label: 'Retry', onClick: () => void save(next, { quiet }) },
+      })
+    } finally {
+      busy.current = false
+    }
+  }
+
+  // Back from sign-in with ?intent=going: finish what they started, then tidy the URL.
+  useEffect(() => {
+    if (!wantsGoing || !signedIn || going === null || intentHandled.current) return
+    intentHandled.current = true
+    navigate({ pathname: location.pathname, hash: location.hash }, { replace: true })
+    if (going) snack({ message: 'You’re already on the list.' })
+    else if (!blocked) void save(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantsGoing, signedIn, going])
+
   // Fans can't attend: no "I'm going" (anyone already marked going can still undo it).
   if (blocked && !going) {
     return (
@@ -382,31 +415,15 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
   }
 
   if (!signedIn) {
-    const returnTo = encodeURIComponent(location.pathname)
+    const returnTo = encodeURIComponent(`${location.pathname}?intent=going`)
     return (
       <div className="cta">
         <Link className="btn btn-primary btn-block" to={`/signin?returnTo=${returnTo}`}>
           <Icon name="check" size={18} /> I'm going
         </Link>
-        <p className="cta__note">Sign in to tell other fans you’re going.</p>
+        <p className="cta__note">Sign in to tell other fans you’re going. We’ll add you straight after.</p>
       </div>
     )
-  }
-
-  const toggle = async () => {
-    const next = !going
-    setBusy(true)
-    setMessage('')
-    try {
-      const status = await api.setGoing(fixtureId, next)
-      setGoing(status.going)
-      onCount(status.goingCount)
-      setMessage(status.going ? 'You’re on the list. See you there.' : 'Removed. You’re no longer marked as going.')
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Couldn’t update. Check your connection and try again.')
-    } finally {
-      setBusy(false)
-    }
   }
 
   return (
@@ -414,15 +431,117 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
       <button
         type="button"
         className={`btn btn-block ${going ? 'btn-going' : 'btn-primary'}`}
-        onClick={toggle}
-        disabled={busy || going === null}
+        onClick={() => void save(!going)}
+        disabled={going === null}
         aria-pressed={going ?? false}
       >
         <Icon name="check" size={18} /> {going ? 'Going (tap to undo)' : "I'm going"}
       </button>
-      <p className="cta__note" aria-live="polite">
-        {message}
-      </p>
+      {going && <NextSteps fixtureId={fixtureId} />}
+    </div>
+  )
+}
+
+/** Shown once a fan is going: the two things most worth doing next. */
+function NextSteps({ fixtureId }: { fixtureId: string }) {
+  const openStays = () => {
+    const heading = document.getElementById('stays')
+    const details = heading?.closest('details')
+    if (details) details.open = true
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    heading?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
+  }
+  return (
+    <div className="next-steps">
+      <button type="button" className="btn btn-sm" onClick={openStays}>
+        Add where you’re staying
+      </button>
+      <Link className="btn btn-sm" to={`/fixtures/${fixtureId}/discuss`}>
+        Join the discussion
+      </Link>
+    </div>
+  )
+}
+
+const SECTION_TABS = [
+  ['overview', 'Overview'],
+  ['travel', 'Travel'],
+  ['areas', 'Areas'],
+  ['guide', 'City'],
+] as const
+
+/** Section tabs that follow your scroll position, with a fade while more tabs are off to the right. */
+function SectionTabs({ fixtureId }: { fixtureId: string }) {
+  const [active, setActive] = useState<string>('overview')
+  const [hasMore, setHasMore] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
+
+  // Active tab = the last section whose top has passed under the slim bar + tabs.
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4
+      let current: string = SECTION_TABS[0][0]
+      for (const [id] of SECTION_TABS) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= 130) current = id
+      }
+      setActive(atBottom ? SECTION_TABS[SECTION_TABS.length - 1][0] : current)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  // Fade the right edge while there are more tabs to scroll to.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const check = () => setHasMore(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4)
+    check()
+    nav.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      nav.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [])
+
+  // Keep the active tab in view horizontally (without moving the page).
+  useEffect(() => {
+    const nav = navRef.current
+    const tab = nav?.querySelector<HTMLElement>(`[data-tab="${active}"]`)
+    if (!nav || !tab) return
+    const left = tab.offsetLeft - nav.offsetLeft
+    if (left < nav.scrollLeft || left + tab.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+      nav.scrollTo({ left: Math.max(0, left - 20) })
+    }
+  }, [active])
+
+  return (
+    <div className={`tabs-wrap tabs--sticky ${hasMore ? 'has-more' : ''}`}>
+      <nav ref={navRef} className="tabs" aria-label="Fixture sections">
+        {SECTION_TABS.map(([id, label]) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            data-tab={id}
+            className={active === id ? 'active' : undefined}
+            aria-current={active === id ? 'location' : undefined}
+          >
+            {label}
+          </a>
+        ))}
+        <Link to={`/fixtures/${fixtureId}/discuss`}>Discuss</Link>
+        <Link to={`/fixtures/${fixtureId}/map`}>Map</Link>
+      </nav>
     </div>
   )
 }

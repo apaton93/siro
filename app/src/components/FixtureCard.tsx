@@ -40,9 +40,9 @@ export function FixtureCard({ fixture }: { fixture: FixtureSummary }) {
           </strong>
         ) : access ? (
           <strong className={`access-badge access-badge--${access.severity}`}>{access.badge}</strong>
-        ) : (
+        ) : fixture.goingCount > 0 ? (
           <strong>{fixture.goingCount} going</strong>
-        )}
+        ) : null}
       </div>
     </Link>
   )

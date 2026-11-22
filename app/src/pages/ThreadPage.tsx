@@ -70,7 +70,7 @@ function Post({ post }: { post: PostInfo }) {
       await api.reportPost(post.id)
       setReported(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not report')
+      setError(err instanceof Error ? err.message : 'Couldn’t send the report. Try again.')
     } finally {
       setConfirming(false)
     }
