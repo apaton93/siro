@@ -1,0 +1,6 @@
+const { Client } = require('pg')
+const c = new Client({ connectionString: process.env.DATABASE_URL })
+c.connect()
+  .then(() => c.query("select count(*)::int as n from information_schema.tables where table_schema = 'public'"))
+  .then(r => { console.log('Tables:', r.rows[0].n); return c.end() })
+  .catch(e => { console.error('ERROR:', e.message); process.exit(1) })

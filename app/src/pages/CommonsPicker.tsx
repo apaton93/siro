@@ -63,7 +63,7 @@ export function CommonsPicker(props: { defaultQuery: string; onPick: (photoUrl: 
       {state.kind === 'error' && <p className="cta__note">{state.message}</p>}
       {state.kind === 'done' &&
         (state.photos.length === 0 ? (
-          <p className="cta__note">No suitable photos – try another search, e.g. the old town or a landmark.</p>
+          <p className="cta__note">No suitable photos. Try another search, e.g. the old town or a landmark.</p>
         ) : (
           <ul className="picker__grid">
             {state.photos.map((p) => (

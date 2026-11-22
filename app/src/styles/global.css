@@ -1,23 +1,22 @@
-/* Siro design tokens and global styles – see docs/adr/0010-visual-design.md */
+/* Siro design tokens and global styles. See docs/adr/0010-visual-design.md */
 
 :root {
   /* Brand */
-  --siro-orange: #f97316;
-  --siro-orange-text: #c2410c; /* small orange text on white (4.5:1+) */
-  --siro-orange-hover: #ea580c;
+  --siro-orange: #fa6b14;
+  --siro-orange-text: #b4470b; /* small orange text on white (4.5:1+) */
+  --siro-orange-hover: #e25a06;
   --ink: #0b0b0c;
   --white: #ffffff;
 
   /* Neutrals */
-  --muted: #52525b;
-  --line: #e4e4e7;
-  --line-strong: #d4d4d8;
-  --surface: #f4f4f5;
-  --placeholder-photo: linear-gradient(160deg, #a1a1aa, #3f3f46);
+  --muted: #5a554f;
+  --line: #e6e2dd;
+  --line-strong: #d3cdc6;
+  --surface: #f5f2ee;
 
   /* Type */
   --font-display: 'Archivo', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* Layout */
   --page-max: 560px;
@@ -85,6 +84,14 @@ img {
   margin: 0;
 }
 
+.display-md {
+  font-size: 22px;
+}
+
+.display-lg {
+  font-size: 28px;
+}
+
 .kicker {
   font-family: var(--font-display);
   font-weight: 700;
@@ -92,10 +99,6 @@ img {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--siro-orange-text);
-}
-
-.kicker::before {
-  content: '▸ ';
 }
 
 .label {
@@ -283,7 +286,7 @@ img {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  background: var(--placeholder-photo);
+  background: var(--ink);
 }
 
 .team-band > .band-photo {
@@ -296,8 +299,7 @@ img {
 }
 
 .team-band > .band-fade,
-.team-band > .band-stripes,
-.team-band > .band-watermark {
+.team-band > .band-stripes {
   position: absolute;
   pointer-events: none;
 }
@@ -315,18 +317,6 @@ img {
   z-index: -1;
 }
 
-.team-band > .band-watermark {
-  left: 12px;
-  bottom: -14px;
-  z-index: -1;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 72px;
-  letter-spacing: 2px;
-  color: transparent;
-  white-space: nowrap;
-}
-
 .band-credit {
   position: absolute;
   right: 6px;
@@ -334,7 +324,7 @@ img {
   font-size: 10px;
   padding: 1px 5px;
   background: rgba(255, 255, 255, 0.85);
-  color: #3f3f46;
+  color: #3d3934;
 }
 
 /* ---------- Fixture card ---------- */
@@ -465,7 +455,7 @@ img {
 
 .skeleton {
   height: 240px;
-  background: linear-gradient(90deg, var(--surface) 25%, #ececee 50%, var(--surface) 75%);
+  background: linear-gradient(90deg, var(--surface) 25%, #ebe6e0 50%, var(--surface) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite linear;
 }
@@ -514,10 +504,6 @@ img {
   font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
-}
-
-.fixture-hero__kicker::before {
-  content: '▸ ';
 }
 
 .fixture-hero h1 {
@@ -600,31 +586,19 @@ img {
   }
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.pulse {
+  margin: 0;
+  padding: 12px var(--gutter);
   border-bottom: 1px solid var(--line);
-  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
 }
 
-.stats > div {
-  padding: 12px 16px;
-  border-right: 1px solid var(--line);
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 2px;
-}
-
-.stats > div:last-child {
-  border-right: 0;
-}
-
-.stats dd {
-  margin: 0;
+.pulse strong {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 24px;
-  line-height: 1.1;
+  font-size: 16px;
+  color: var(--ink);
 }
 
 .cta {
@@ -662,7 +636,7 @@ img {
 .prose {
   margin: 0;
   font-size: 14px;
-  color: #3f3f46;
+  color: #3d3934;
   white-space: pre-line;
 }
 
@@ -916,7 +890,7 @@ select.input {
 }
 
 .advisory--caution {
-  background: #fff7ed;
+  background: #fff4ea;
   border-color: var(--siro-orange);
   color: #7c2d12;
 }
@@ -961,7 +935,7 @@ select.input {
   min-height: 120px;
   padding: 16px;
   overflow: hidden;
-  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.08) 0 14px, transparent 14px 28px);
+  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.04) 0 14px, transparent 14px 28px);
 }
 
 .comp-card__code {
@@ -993,7 +967,7 @@ select.input {
   align-items: flex-start;
   gap: 6px;
   padding: 16px var(--gutter) 24px;
-  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.08) 0 14px, transparent 14px 28px);
+  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.04) 0 14px, transparent 14px 28px);
 }
 
 .comp-hero .icon-btn {
@@ -1286,8 +1260,7 @@ label.btn {
   font-size: 32px;
 }
 
-.fixture-hero .band-stripes,
-.fixture-hero .band-watermark {
+.fixture-hero .band-stripes {
   -webkit-mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 65%);
   mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 65%);
 }
@@ -1328,6 +1301,26 @@ label.btn {
 .fixture-hero__time strong {
   font-weight: 700;
   font-size: 14px;
+}
+
+/* Long team names (GALATASARAY, BODØ/GLIMT) shrink instead of pushing the kickoff off-screen. */
+.fixture-hero__team {
+  min-width: 0;
+}
+
+.fixture-hero .fixture-hero__team h1 {
+  font-size: clamp(20px, 6.4vw, 32px);
+  /* Only breaks a word if it can't fit even at the smallest size. */
+  overflow-wrap: break-word;
+}
+
+.fixture-hero__countdown {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
 }
 
 /* The tint now fades out low down, so lift text slightly off busy photos. */

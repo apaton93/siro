@@ -37,7 +37,7 @@ function Competition({ card }: { card: CompetitionCardInfo }) {
         {card.photo && <small className="band-credit">Photo: {card.photo.credit}</small>}
       </header>
       <main className="page">
-        <h2 className="display" style={{ fontSize: 22 }}>
+        <h2 className="display display-md">
           Upcoming fixtures
         </h2>
         <FixtureList

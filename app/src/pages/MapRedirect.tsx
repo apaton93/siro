@@ -48,7 +48,7 @@ export function MapRedirect() {
         )}
         {failed === 'error' && (
           <StateMessage title="Couldn't open the map" action={<Link to="/" className="btn btn-sm">Back to fixtures</Link>}>
-            Something went wrong finding your next fixture.
+            We couldn’t load your fixtures. Check your connection and try again.
           </StateMessage>
         )}
       </main>

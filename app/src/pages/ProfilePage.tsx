@@ -37,7 +37,7 @@ export function ProfilePage() {
         {auth.status === 'signed-out' && (
           <>
             <span className="kicker">Your profile</span>
-            <h1 className="display" style={{ fontSize: 28 }}>
+            <h1 className="display display-lg">
               Sign in
             </h1>
             <p className="prose">Sign in to pick your teams and tell other fans you’re going.</p>
@@ -56,7 +56,7 @@ function Profile({ me }: { me: Me }) {
       <header style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <Avatar name={me.displayName} url={me.avatarUrl} size="lg" />
         <div>
-          <h1 className="display" style={{ fontSize: 22 }}>
+          <h1 className="display display-md">
             {me.displayName}
           </h1>
           <span className="label">Signed in with {me.authProvider === 'github' ? 'GitHub' : 'Microsoft'}</span>
@@ -93,7 +93,7 @@ function PhotoForm({ me }: { me: Me }) {
       setTimeout(() => setStatus((s) => (s.kind === 'saved' ? { kind: 'idle' } : s)), 2500)
       return done
     } catch (err) {
-      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Something went wrong' })
+      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Couldn’t save your profile. Try again.' })
     }
   }
 

@@ -41,7 +41,7 @@ export function ThreadPage() {
               <span className="kicker">
                 {CATEGORY_LABELS[state.data.thread.category]} · {state.data.fixture.homeTeam} v {state.data.fixture.awayTeam}
               </span>
-              <h1 className="display" style={{ fontSize: 22 }}>
+              <h1 className="display display-md">
                 {state.data.thread.title}
               </h1>
             </div>
@@ -92,7 +92,7 @@ function Post({ post }: { post: PostInfo }) {
         {auth.status === 'signed-in' && !post.mine && !post.hidden && (
           <div className="post__actions">
             {reported ? (
-              <span className="cta__note">Reported – thanks.</span>
+              <span className="cta__note">Reported. Thanks.</span>
             ) : (
               <button type="button" className="link-btn" onClick={report} aria-label={`Report post by ${post.author.displayName}`}>
                 {confirming ? 'Tap again to report' : 'Report'}

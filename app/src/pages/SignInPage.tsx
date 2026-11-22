@@ -37,8 +37,7 @@ export function SignInPage() {
     <>
       <TopBar />
       <main className="page">
-        <span className="kicker">Sign in</span>
-        <h1 className="display" style={{ fontSize: 28 }}>
+        <h1 className="display display-lg">
           Join the away end
         </h1>
         <p className="prose">
@@ -46,7 +45,7 @@ export function SignInPage() {
         </p>
         <SignInButtons returnTo={returnTo} />
         <p className="cta__note">
-          We only keep a display name you choose and the teams you pick – never your email address.
+          We only keep a display name you choose and the teams you pick. Never your email address.
         </p>
       </main>
     </>

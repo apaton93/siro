@@ -29,7 +29,7 @@ export function FansStaying({ fixtureId, refreshKey }: { fixtureId: string; refr
   if (state.status === 'error') {
     const notGoing = state.error instanceof ApiRequestError && state.error.status === 403
     return notGoing ? (
-      <p className="prose">Mark yourself as going to see where other fans are staying – and share yours.</p>
+      <p className="prose">Mark yourself as going to see where other fans are staying, and share yours.</p>
     ) : (
       <p className="prose">
         Couldn’t load where fans are staying.{' '}
@@ -54,7 +54,7 @@ export function FansStaying({ fixtureId, refreshKey }: { fixtureId: string; refr
         <StayMap stadium={stays.stadium} cells={stays.cells} mine={stays.mine} label="Map of where fans are staying" />
       </Suspense>
       <p className="cta__note">
-        Squares are about 500m across – exact locations are never stored.
+        Squares are about 500m across. Exact locations are never stored.
         {stays.mine?.visibility === 'private' && ' Your stay is private and not counted.'}
       </p>
       <button type="button" className="btn btn-dark" onClick={() => setPicking(true)} style={{ alignSelf: 'flex-start' }}>
@@ -91,7 +91,7 @@ function StayPicker(props: { fixtureId: string; stays: StaysResponse; onDone: (n
           mine={props.stays.mine}
           picked={picked}
           onPick={(lat, lng) => setPicked({ lat, lng })}
-          label="Map – tap to choose where you’re staying"
+          label="Map: tap to choose where you’re staying"
         />
       </Suspense>
       <label className="check">

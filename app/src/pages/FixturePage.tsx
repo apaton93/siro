@@ -83,7 +83,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         setShareNote('Link copied')
       }
     } catch {
-      // User cancelled the share sheet – nothing to do.
+      // User cancelled the share sheet: nothing to do.
     }
   }
 
@@ -121,7 +121,6 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           photoCredit={city.photoCredit}
           solidUntil={30}
           clearTop={45}
-          watermark
         >
           <div className="fixture-hero__bar">
             <Link to="/" className="icon-btn" aria-label="Back to fixtures">
@@ -139,7 +138,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
           </div>
 
           <div className="fixture-hero__bottom">
-            <div>
+            <div className="fixture-hero__team">
               <h1 className="display">{homeTeam.name}</h1>
               <span className="fixture-hero__sub">{city.name}</span>
             </div>
@@ -147,6 +146,7 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
               <strong>{kickoff.date}</strong>
               <span>{kickoff.local}</span>
               {kickoff.uk && <span className="fixture-hero__sub">{kickoff.uk}</span>}
+              <span className="fixture-hero__countdown">{countdown(fixture.kickoffUtc)}</span>
             </time>
           </div>
           <span className="visually-hidden" aria-live="polite">
@@ -155,20 +155,21 @@ function Fixture({ fixture }: { fixture: FixtureDetail }) {
         </TeamBand>
         <div ref={sentinelRef} aria-hidden="true" />
 
-        <dl className="stats">
-          <div>
-            <dt className="label">Fans going</dt>
-            <dd>{goingCount}</dd>
-          </div>
-          <div>
-            <dt className="label">Threads</dt>
-            <dd>{fixture.threadCount}</dd>
-          </div>
-          <div>
-            <dt className="label">Days to go</dt>
-            <dd>{daysUntil(fixture.kickoffUtc)}</dd>
-          </div>
-        </dl>
+        <p className="pulse">
+          {goingCount > 0 ? (
+            <>
+              <strong>{goingCount}</strong> {goingCount === 1 ? 'fan' : 'fans'} going
+            </>
+          ) : (
+            'No one’s said they’re going yet. Be the first.'
+          )}
+          {fixture.threadCount > 0 && (
+            <>
+              {' · '}
+              <strong>{fixture.threadCount}</strong> {fixture.threadCount === 1 ? 'thread' : 'threads'}
+            </>
+          )}
+        </p>
 
         <FanAccessBanner access={fixture.fanAccess} note={fixture.fanAccessNote} />
         <GoingButton fixtureId={fixture.id} fanAccess={fixture.fanAccess} onCount={setGoingCount} />
@@ -375,7 +376,7 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
         <button type="button" className="btn btn-primary btn-block" disabled>
           <Icon name="check" size={18} /> I'm going
         </button>
-        <p className="cta__note">Unavailable – fans can’t attend this match.</p>
+        <p className="cta__note">Away fans can’t attend this match.</p>
       </div>
     )
   }
@@ -400,9 +401,9 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
       const status = await api.setGoing(fixtureId, next)
       setGoing(status.going)
       onCount(status.goingCount)
-      setMessage(status.going ? 'You’re on the list – see you there.' : 'Removed – you’re no longer marked as going.')
+      setMessage(status.going ? 'You’re on the list. See you there.' : 'Removed. You’re no longer marked as going.')
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Something went wrong')
+      setMessage(err instanceof Error ? err.message : 'Couldn’t update. Check your connection and try again.')
     } finally {
       setBusy(false)
     }
@@ -417,13 +418,20 @@ function GoingButton(props: { fixtureId: string; fanAccess: FanAccess; onCount: 
         disabled={busy || going === null}
         aria-pressed={going ?? false}
       >
-        <Icon name="check" size={18} /> {going ? 'Going – tap to undo' : "I'm going"}
+        <Icon name="check" size={18} /> {going ? 'Going (tap to undo)' : "I'm going"}
       </button>
       <p className="cta__note" aria-live="polite">
         {message}
       </p>
     </div>
   )
+}
+
+/** Header countdown: "Today", "Tomorrow", "In 3 days"; nothing once kicked off. */
+function countdown(kickoffUtc: string): string | null {
+  if (new Date(kickoffUtc).getTime() < Date.now()) return null
+  const days = daysUntil(kickoffUtc)
+  return days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
 }
 
 /** True once the sentinel (placed under the hero) has scrolled above the top of the screen. */

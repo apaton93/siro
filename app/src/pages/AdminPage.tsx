@@ -145,7 +145,7 @@ function RecordList(props: {
   return (
     <section className="panel" aria-labelledby="list-heading">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-        <h1 id="list-heading" className="display" style={{ fontSize: 22 }}>
+        <h1 id="list-heading" className="display display-md">
           {config.title} <span className="label">({rows.length})</span>
         </h1>
         <button type="button" className="btn btn-sm btn-primary" onClick={props.onAdd}>
@@ -212,7 +212,7 @@ function toBody(config: EntityConfig, ref: AdminReference, values: Values): Reco
       else return `${f.label} must be a number`
     } else if (f.kind === 'kickoff') {
       const tz = stadiumTimezone(ref, values.stadiumId)
-      if (!tz) return 'Pick a stadium first – kickoff is in its local time'
+      if (!tz) return 'Pick a stadium first. Kickoff is in its local time.'
       const utc = zonedTimeToUtc(raw, tz)
       if (!utc) return 'Enter a kickoff date and time'
       body[f.key] = utc
@@ -263,7 +263,7 @@ function EditForm(props: { config: EntityConfig; ref_: AdminReference; row: Row 
 
   return (
     <form className="panel admin-form" onSubmit={save} noValidate>
-      <h1 className="display" style={{ fontSize: 22 }}>
+      <h1 className="display display-md">
         {label}
       </h1>
 
