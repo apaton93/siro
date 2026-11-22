@@ -35,7 +35,7 @@ export function DiscussPage() {
         </Link>
         <div>
           <span className="kicker">Discussion</span>
-          <h1 className="display" style={{ fontSize: 24 }}>
+          <h1 className="display display-md">
             {title || ' '}
           </h1>
         </div>
@@ -76,7 +76,7 @@ export function DiscussPage() {
           {threads.state.status === 'success' &&
             (threads.state.data.threads.length === 0 ? (
               <StateMessage title="No threads yet">
-                {category ? `Nothing about ${CATEGORY_LABELS[category].toLowerCase()} yet.` : 'Be the first to start one.'}
+                {category ? `Nothing about ${CATEGORY_LABELS[category].toLowerCase()} yet.` : 'Ask about tickets, travel or where to drink.'}
               </StateMessage>
             ) : (
               <ul className="rows" aria-label="Threads">

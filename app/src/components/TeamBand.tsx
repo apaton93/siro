@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { bandFade, bandStripes, rgba } from '../lib/colour'
+import { bandFade, bandStripes } from '../lib/colour'
 
 interface TeamBandProps {
   /** Away team's kit colour (#RRGGBB) and the text colour that reads on it. */
@@ -11,7 +11,6 @@ interface TeamBandProps {
   solidUntil?: number
   /** % of the band (from the top) left completely untinted, so more of the city shows. */
   clearTop?: number
-  watermark?: boolean
   className?: string
   children: ReactNode
 }
@@ -19,6 +18,7 @@ interface TeamBandProps {
 /**
  * City photo fading into solid team colour (ADR-0010).
  * Text always sits on the solid part, so it stays readable over any photo.
+ * No photo: solid team colour plus stripes.
  */
 export function TeamBand({
   colour,
@@ -27,20 +27,14 @@ export function TeamBand({
   photoCredit,
   solidUntil = 45,
   clearTop,
-  watermark = false,
   className = '',
   children,
 }: TeamBandProps) {
   return (
-    <div className={`team-band ${className}`} style={{ color: textColour }}>
+    <div className={`team-band ${className}`} style={{ color: textColour, backgroundColor: colour }}>
       {photoUrl && <img className="band-photo" src={photoUrl} alt="" loading="lazy" decoding="async" />}
       <div className="band-fade" style={{ background: bandFade(colour, solidUntil, clearTop) }} aria-hidden="true" />
       <div className="band-stripes" style={{ backgroundImage: bandStripes(textColour) }} aria-hidden="true" />
-      {watermark && (
-        <div className="band-watermark" style={{ WebkitTextStroke: `1px ${rgba(textColour, 0.16)}` }} aria-hidden="true">
-          AWAY DAY
-        </div>
-      )}
       {photoUrl && photoCredit && <small className="band-credit">Photo: {photoCredit}</small>}
       {children}
     </div>

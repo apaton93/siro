@@ -15,7 +15,7 @@ export interface FixtureMapProps {
   picked?: { lat: number; lng: number } | null
 }
 
-const ORANGE = '#F97316'
+const ORANGE = '#FA6B14'
 
 const pin = (label: string, cls: string) =>
   L.divIcon({ className: '', html: `<span class="map-pin ${cls}">${label}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] })
@@ -101,7 +101,7 @@ export default function FixtureMap(props: FixtureMapProps) {
       ref={el}
       className="fixture-map"
       role="region"
-      aria-label={props.onPick ? 'Map – tap to place your suggestion' : 'Map of the stadium and recommended places'}
+      aria-label={props.onPick ? 'Map: tap to place your suggestion' : 'Map of the stadium and recommended places'}
     />
   )
 }

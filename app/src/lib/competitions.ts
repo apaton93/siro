@@ -1,5 +1,5 @@
 /**
- * The competitions shown as cards on the home page. Our own colours and wording –
+ * The competitions shown as cards on the home page. Our own colours and wording,
  * no official logos or branding (ADR-0010).
  */
 export interface CompetitionCardInfo {
@@ -8,43 +8,43 @@ export interface CompetitionCardInfo {
   tagline: string
   colour: string
   textColour: string
-  /** Floodlit-stadium photo (Wikimedia Commons), tinted with `colour`. */
+  /** Photo of this season's final venue (Wikimedia Commons), tinted with `colour`. */
   photo?: { url: string; credit: string }
 }
 
-/** Photos: Allianz Arena by Richard Bartz (Wikimedia Commons, CC BY-SA 2.5) – night, golden hour, daylight. */
+/** Photos: each competition's 2026/27 final venue (Wikimedia Commons). */
 export const COMPETITION_CARDS: CompetitionCardInfo[] = [
   {
     code: 'UCL',
     name: 'Champions League',
-    tagline: 'Europe’s top club competition',
+    tagline: 'Final: Metropolitano, Madrid',
     colour: '#0B1D51',
     textColour: '#FFFFFF',
     photo: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Allianz_arena_at_night_Richard_Bartz.jpg/1280px-Allianz_arena_at_night_Richard_Bartz.jpg',
-      credit: 'Richard Bartz, CC BY-SA 2.5, via Wikimedia Commons',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Atleti_vs_Villarreal_-_September_2025.jpg/1280px-Atleti_vs_Villarreal_-_September_2025.jpg',
+      credit: 'Elwin594, CC0, via Wikimedia Commons',
     },
   },
   {
     code: 'UEL',
     name: 'Europa League',
-    tagline: 'Thursday nights across Europe',
+    tagline: 'Final: Stadion Frankfurt',
     colour: '#F26A1B',
     textColour: '#0B0B0C',
     photo: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Allianz_arena_golden_hour_Richard_Bartz.jpg/1280px-Allianz_arena_golden_hour_Richard_Bartz.jpg',
-      credit: 'Richard Bartz, CC BY-SA 2.5, via Wikimedia Commons',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Deutsche_bank_park.jpg/1280px-Deutsche_bank_park.jpg',
+      credit: 'Patrik Meyer, CC BY-SA 4.0, via Wikimedia Commons',
     },
   },
   {
     code: 'UECL',
     name: 'Conference League',
-    tagline: 'The road less travelled',
+    tagline: 'Final: Beşiktaş Park, Istanbul',
     colour: '#0E7C4A',
     textColour: '#FFFFFF',
     photo: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Allianz_arena_daylight_Richard_Bartz.jpg/1280px-Allianz_arena_daylight_Richard_Bartz.jpg',
-      credit: 'Richard Bartz, CC BY-SA 2.5, via Wikimedia Commons',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/T%C3%BCpra%C5%9F_Stadyumu_20231011_2.jpg/1280px-T%C3%BCpra%C5%9F_Stadyumu_20231011_2.jpg',
+      credit: 'Beşiktaş JK, CC BY 2.0, via Wikimedia Commons',
     },
   },
 ]

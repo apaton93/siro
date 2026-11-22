@@ -36,7 +36,7 @@ export function bandFade(hex: string, solidUntil = 45, clearTop?: number): strin
 
 /** Subtle diagonal stripe motif in the text colour. */
 export function bandStripes(textHex: string, stripe = 12, gap = 14): string {
-  return `repeating-linear-gradient(115deg, ${rgba(textHex, 0.14)} 0 ${stripe}px, transparent ${stripe}px ${
+  return `repeating-linear-gradient(115deg, ${rgba(textHex, 0.07)} 0 ${stripe}px, transparent ${stripe}px ${
     stripe + gap
   }px)`
 }

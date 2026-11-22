@@ -14,7 +14,7 @@ export interface StayMapProps {
   label: string
 }
 
-const ORANGE = '#F97316'
+const ORANGE = '#FA6B14'
 const INK = '#0B0B0C'
 
 /** OpenStreetMap with shaded ~500m squares (darker = more fans) and the stadium. Default export for React.lazy. */

@@ -49,7 +49,7 @@ export function MapRedirect() {
         )}
         {result === 'error' && (
           <StateMessage title="Couldn't open the map" action={browse}>
-            Something went wrong finding your next game.
+            We couldn’t load your fixtures. Check your connection and try again.
           </StateMessage>
         )}
       </main>

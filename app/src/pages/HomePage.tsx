@@ -72,7 +72,7 @@ function SearchResults({ q }: { q: string }) {
   const { state, reload } = useApi(`fixtures:q:${q}`, (signal) => api.fixtures({ q }, signal))
   return (
     <>
-      <h1 className="display" style={{ fontSize: 22 }}>
+      <h1 className="display display-md">
         Results
       </h1>
       <FixtureList
@@ -93,13 +93,13 @@ function MyTeams() {
   if (auth.status === 'signed-out') {
     return (
       <section className="panel" aria-labelledby="my-teams-heading">
-        <h1 id="my-teams-heading" className="display" style={{ fontSize: 22 }}>
+        <h1 id="my-teams-heading" className="display display-md">
           Follow your teams
         </h1>
         <p className="prose">Sign in and pick your teams to see their away days here.</p>
         <SignInButtons returnTo="/" />
         <Link to="?tab=competitions" className="cta__note">
-          Or browse by competition →
+          Or browse by competition
         </Link>
       </section>
     )
@@ -129,18 +129,18 @@ function MyTeamsFixtures({ teamIds }: { teamIds: string[] }) {
   return (
     <>
       <section className="stack" aria-labelledby="upcoming-heading">
-        <h1 id="upcoming-heading" className="display" style={{ fontSize: 22 }}>
+        <h1 id="upcoming-heading" className="display display-md">
           Upcoming away days
         </h1>
         <FixtureList
           state={upcoming.state}
           reload={upcoming.reload}
           label="upcoming fixtures"
-          empty={<StateMessage title="Nothing coming up">No away fixtures for your teams yet – check back soon.</StateMessage>}
+          empty={<StateMessage title="Nothing coming up">No away fixtures for your teams yet. New ones appear as soon as they’re scheduled.</StateMessage>}
         />
       </section>
       <section className="stack" aria-labelledby="results-heading">
-        <h2 id="results-heading" className="display" style={{ fontSize: 22 }}>
+        <h2 id="results-heading" className="display display-md">
           Recent away results
         </h2>
         <FixtureList

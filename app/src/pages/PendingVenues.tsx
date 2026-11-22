@@ -29,7 +29,7 @@ export function PendingVenues() {
   }
   return (
     <section className="panel" aria-labelledby="venues-heading">
-      <h1 id="venues-heading" className="display" style={{ fontSize: 22 }}>
+      <h1 id="venues-heading" className="display display-md">
         Suggested places <span className="label">({state.data.venues.length})</span>
       </h1>
       <p className="cta__note">Fans’ suggestions only show on the map once approved. Check the pin and name first.</p>
@@ -90,7 +90,7 @@ function PendingRow({ venue: v }: { venue: PendingVenue }) {
       </a>
       {done ? (
         <p className="cta__note" role="status">
-          {done === 'approved' ? 'Approved – now on the map.' : 'Rejected.'}
+          {done === 'approved' ? 'Approved. Now on the map.' : 'Rejected.'}
         </p>
       ) : (
         <>

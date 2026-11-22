@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { TopBar } from '../components/AppShell'
 import { Avatar } from '../components/Avatar'
 import { Icon } from '../components/Icon'
+import { useSnackbar } from '../components/Snackbar'
 import { StateMessage } from '../components/StateMessage'
 import { api, useApi, useDebounced } from '../lib/api'
 import { signOutUrl, useAuth } from '../lib/auth'
@@ -37,7 +38,7 @@ export function ProfilePage() {
         {auth.status === 'signed-out' && (
           <>
             <span className="kicker">Your profile</span>
-            <h1 className="display" style={{ fontSize: 28 }}>
+            <h1 className="display display-lg">
               Sign in
             </h1>
             <p className="prose">Sign in to pick your teams and tell other fans you’re going.</p>
@@ -56,7 +57,7 @@ function Profile({ me }: { me: Me }) {
       <header style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <Avatar name={me.displayName} url={me.avatarUrl} size="lg" />
         <div>
-          <h1 className="display" style={{ fontSize: 22 }}>
+          <h1 className="display display-md">
             {me.displayName}
           </h1>
           <span className="label">Signed in with {me.authProvider === 'github' ? 'GitHub' : 'Microsoft'}</span>
@@ -83,17 +84,17 @@ function Profile({ me }: { me: Me }) {
 
 function PhotoForm({ me }: { me: Me }) {
   const { setMe } = useAuth()
+  const snack = useSnackbar()
   const [status, setStatus] = useState<{ kind: 'idle' | 'saving' | 'saved' } | { kind: 'error'; message: string }>({ kind: 'idle' })
 
   const run = async (action: () => Promise<Me>, done: string) => {
     setStatus({ kind: 'saving' })
     try {
       setMe(await action())
-      setStatus({ kind: 'saved' })
-      setTimeout(() => setStatus((s) => (s.kind === 'saved' ? { kind: 'idle' } : s)), 2500)
-      return done
+      setStatus({ kind: 'idle' })
+      snack({ message: done })
     } catch (err) {
-      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Something went wrong' })
+      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Couldn’t save your profile. Try again.' })
     }
   }
 
@@ -122,11 +123,9 @@ function PhotoForm({ me }: { me: Me }) {
       <p className="cta__note" aria-live="polite">
         {status.kind === 'saving'
           ? 'Uploading…'
-          : status.kind === 'saved'
-            ? 'Saved.'
-            : status.kind === 'error'
-              ? status.message
-              : 'Shown next to your posts. We crop it to a square and remove location data.'}
+          : status.kind === 'error'
+            ? status.message
+            : 'Shown next to your posts. We crop it to a square and remove location data.'}
       </p>
     </section>
   )
@@ -134,6 +133,7 @@ function PhotoForm({ me }: { me: Me }) {
 
 function NameForm({ me }: { me: Me }) {
   const { setMe } = useAuth()
+  const snack = useSnackbar()
   const [name, setName] = useState(me.displayName)
   const [status, setStatus] = useState<{ kind: 'idle' | 'saving' | 'saved' } | { kind: 'error'; message: string }>({ kind: 'idle' })
 
@@ -142,9 +142,10 @@ function NameForm({ me }: { me: Me }) {
     setStatus({ kind: 'saving' })
     try {
       setMe(await api.updateMe({ displayName: name }))
-      setStatus({ kind: 'saved' })
+      setStatus({ kind: 'idle' })
+      snack({ message: 'Display name saved.' })
     } catch (err) {
-      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Could not save' })
+      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Couldn’t save your name. Try again.' })
     }
   }
 
@@ -172,11 +173,9 @@ function NameForm({ me }: { me: Me }) {
         </button>
       </div>
       <p id="name-help" className="cta__note" aria-live="polite">
-        {status.kind === 'saved'
-          ? 'Saved.'
-          : status.kind === 'error'
-            ? status.message
-            : `Shown to other fans. ${LIMITS.displayNameMin}–${LIMITS.displayNameMax} characters.`}
+        {status.kind === 'error'
+          ? status.message
+          : `Shown to other fans. ${LIMITS.displayNameMin}–${LIMITS.displayNameMax} characters.`}
       </p>
     </form>
   )
@@ -184,6 +183,7 @@ function NameForm({ me }: { me: Me }) {
 
 function TeamsEditor({ me }: { me: Me }) {
   const { setMe } = useAuth()
+  const snack = useSnackbar()
   const [selected, setSelected] = useState<MyTeam[]>(me.teams)
   const [search, setSearch] = useState('')
   const q = useDebounced(search.trim(), 250)
@@ -218,9 +218,10 @@ function TeamsEditor({ me }: { me: Me }) {
       const updated = await api.setMyTeams({ teams: selected.map((t) => ({ teamId: t.id, isPrimary: t.isPrimary })) })
       setMe(updated)
       setSelected(updated.teams)
-      setStatus({ kind: 'saved' })
+      setStatus({ kind: 'idle' })
+      snack({ message: 'Teams saved. Their away days are on your home page.' })
     } catch (err) {
-      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Could not save' })
+      setStatus({ kind: 'error', message: err instanceof Error ? err.message : 'Couldn’t save your teams. Try again.' })
     }
   }
 
@@ -300,7 +301,7 @@ function TeamsEditor({ me }: { me: Me }) {
           Save teams
         </button>
         <span className="cta__note" aria-live="polite">
-          {status.kind === 'saved' ? 'Saved.' : status.kind === 'error' ? status.message : ''}
+          {status.kind === 'error' ? status.message : ''}
         </span>
       </div>
     </section>

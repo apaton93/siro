@@ -13,13 +13,13 @@ export interface FanAccessInfo {
 const INFO: Record<Exclude<FanAccess, 'normal'>, FanAccessInfo> = {
   behind_closed_doors: {
     badge: 'No fans',
-    title: 'Don’t travel – behind closed doors',
+    title: 'Don’t travel: behind closed doors',
     body: 'This match will be played without supporters.',
     severity: 'stop',
   },
   no_away_fans: {
     badge: 'No away fans',
-    title: 'Don’t travel – no away fans',
+    title: 'Don’t travel: no away fans',
     body: 'Away supporters are banned from this match and won’t be admitted.',
     severity: 'stop',
   },

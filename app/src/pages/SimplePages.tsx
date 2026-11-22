@@ -13,7 +13,7 @@ export function ComingSoonPage({ title, children }: { title: string; children: s
       <TopBar />
       <main className="page">
         <span className="kicker">Coming soon</span>
-        <h1 className="display" style={{ fontSize: 28 }}>
+        <h1 className="display display-lg">
           {title}
         </h1>
         <p className="prose">{children}</p>
@@ -58,7 +58,7 @@ export function StatusPage() {
     <>
       <TopBar />
       <main className="page" aria-live="polite">
-        <h1 className="display" style={{ fontSize: 22 }}>
+        <h1 className="display display-md">
           System status
         </h1>
         {health.status === 'loading' && <p className="prose">Checking…</p>}

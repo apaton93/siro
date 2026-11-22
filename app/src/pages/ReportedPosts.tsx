@@ -27,7 +27,7 @@ export function ReportedPosts() {
   }
   return (
     <section className="panel" aria-labelledby="reports-heading">
-      <h1 id="reports-heading" className="display" style={{ fontSize: 22 }}>
+      <h1 id="reports-heading" className="display display-md">
         Reported posts <span className="label">({state.data.posts.length})</span>
       </h1>
       <p className="cta__note">Posts are hidden automatically after 3 reports. Restoring a post clears its reports.</p>

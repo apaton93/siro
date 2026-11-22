@@ -56,7 +56,7 @@ export function FixtureMapPage() {
           <>
             <div>
               <span className="kicker">Map · {f?.city.name ?? ''}</span>
-              <h1 className="display" style={{ fontSize: 24 }}>
+              <h1 className="display display-md">
                 {f ? `${f.homeTeam.name} v ${f.awayTeam.name}` : ' '}
               </h1>
             </div>
@@ -112,7 +112,7 @@ export function FixtureMapPage() {
 
             {!suggesting && (
               <section aria-labelledby="places-heading" className="stack" style={{ gap: 8 }}>
-                <h2 id="places-heading" className="display" style={{ fontSize: 20 }}>
+                <h2 id="places-heading" className="display display-md">
                   Places near the ground
                 </h2>
                 {venues.state.status === 'loading' && <div className="skeleton" style={{ height: 160 }} />}
@@ -169,7 +169,7 @@ function SuggestButton({ onStart, thanks }: { onStart: () => void; thanks: boole
     <div className="stack" style={{ gap: 6 }}>
       {thanks && (
         <p className="notice" role="status">
-          Thanks – your suggestion will show once it’s been checked.
+          Thanks. Your suggestion will show once it’s been checked.
         </p>
       )}
       <button type="button" className="btn btn-dark" style={{ alignSelf: 'flex-start' }} onClick={onStart}>
@@ -324,7 +324,7 @@ function VenueTips({ id, onTipped }: { id: string; onTipped: () => void }) {
           <input
             id={`tip-${id}`}
             className="input"
-            placeholder="Add a tip – prices, atmosphere, opening times…"
+            placeholder="Add a tip: prices, atmosphere, opening times…"
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={VENUE_LIMITS.tipMax}
